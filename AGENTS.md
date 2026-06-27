@@ -3,7 +3,7 @@
 > Read this file completely before writing or modifying any code.
 > Skills installed (drizzle, supabase, next-best-practices, react-best-practices,
 > composition-patterns, shadcn, typescript-advanced-types, nodejs-backend-patterns,
-> tailwind-v4-shadcn, accessibility, seo, mercado-libre) cover framework patterns.
+> tailwind-v4-shadcn, accessibility, seo, mercado-libre, zod) cover framework patterns.
 > This file covers only project-specific rules.
 
 ---
