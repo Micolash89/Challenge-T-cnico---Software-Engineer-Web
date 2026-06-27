@@ -1,7 +1,6 @@
 'use client';
 
-import { useActionState, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useActionState, useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Loader2, ArrowLeft, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
@@ -10,10 +9,17 @@ import { createOrderAction } from '@/actions/order.actions';
 import { ROUTES } from '@/constants/routes.constants';
 
 export default function CheckoutPage() {
-  const router = useRouter();
-  const { items } = useCartStore();
+  const { items, clearCart } = useCartStore();
   const [paymentMethod, setPaymentMethod] = useState<'mercadopago' | 'whatsapp_efectivo'>('mercadopago');
   const [state, formAction, pending] = useActionState(createOrderAction, null);
+
+  // Redirect when the action returns a URL
+  useEffect(() => {
+    if (state?.redirectUrl) {
+      clearCart();
+      window.location.href = state.redirectUrl;
+    }
+  }, [state?.redirectUrl, clearCart]);
 
   // If cart is empty, show message
   if (items.length === 0 && !pending) {
