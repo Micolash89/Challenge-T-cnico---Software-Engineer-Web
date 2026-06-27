@@ -27,6 +27,12 @@
       "sourceType": "autoskills-registry",
       "computedHash": "82fb11a63fb1e35ee2469516ed02d54695f783115b1540c0e783197af4240a3a"
     },
+    "mercado-libre": {
+      "source": "membranedev/application-skills",
+      "sourceType": "github",
+      "skillPath": "skills/mercado-libre/SKILL.md",
+      "computedHash": "6b6195bb0e5769b57f97841375908ccb4d112a5b57cbde3ca336ee91577c270e"
+    },
     "next-best-practices": {
       "source": "vercel-labs/next-skills",
       "sourceType": "autoskills-registry",
