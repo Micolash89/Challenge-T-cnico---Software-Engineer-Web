@@ -2,8 +2,9 @@ import { notFound } from 'next/navigation';
 import { ProductGrid } from '@/components/features/catalog/ProductGrid';
 import { CatalogFilters } from '@/components/features/catalog/CatalogFilters';
 import { getProductsByLine, getProductSorts } from '@/services/product.service';
+import { VALID_PRODUCT_LINES } from '@/constants/database.constants';
 
-const VALID_LINES = ['yugioh', 'pokemon', 'mtg'] as const;
+export const dynamic = 'force-dynamic';
 
 interface CatalogPageProps {
   params: Promise<{ product_line_name: string }>;
@@ -35,7 +36,7 @@ export default async function CatalogPage({
 }: CatalogPageProps) {
   const { product_line_name } = await params;
 
-  if (!VALID_LINES.includes(product_line_name as typeof VALID_LINES[number])) {
+  if (!VALID_PRODUCT_LINES.includes(product_line_name as typeof VALID_PRODUCT_LINES[number])) {
     notFound();
   }
 

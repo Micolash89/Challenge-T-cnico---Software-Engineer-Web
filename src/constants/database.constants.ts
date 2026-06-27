@@ -19,3 +19,5 @@ export const PRODUCT_TYPE = {
   CARD: 'card',
   BOX: 'box',
 } as const;
+
+export const VALID_PRODUCT_LINES = ['yugioh', 'pokemon', 'mtg'] as const;
