@@ -1,0 +1,51 @@
+name: CI
+
+# Cuándo se ejecuta
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
+
+jobs:
+  ci:
+    name: Typecheck · Lint · Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Bajamos el código del repo
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Instalamos pnpm (nuestro package manager)
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      # 3. Instalamos Node con cache de pnpm para que sea más rápido
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      # 4. Instalamos dependencias (--frozen-lockfile = falla si el lockfile está desactualizado)
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # 5. TypeScript — cero errores de tipos
+      - name: Typecheck
+        run: pnpm typecheck
+
+      # 6. ESLint — cero warnings ni errores
+      - name: Lint
+        run: pnpm lint
+
+      # 7. Vitest — todos los tests en verde
+      - name: Run tests
+        run: pnpm test --run
