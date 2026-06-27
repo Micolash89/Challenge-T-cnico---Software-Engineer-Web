@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { ROUTES } from '@/constants/routes.constants';
 
 const FOOTER_LINKS = [
   { label: 'Yu-Gi-Oh!', href: '/yugioh' },
