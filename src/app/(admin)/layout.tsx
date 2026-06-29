@@ -1,8 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { ROUTES } from '@/constants/routes.constants';
-
-export const dynamic = 'force-dynamic';
+import { AdminSidebar } from '@/components/features/admin/AdminSidebar';
+import { Toaster } from '@/components/ui/sonner';
 
 export default async function AdminLayout({
   children,
@@ -12,25 +11,18 @@ export default async function AdminLayout({
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect(ROUTES.LOGIN);
+  const role = user?.user_metadata?.role as string | undefined;
+  if (!user || !['admin', 'super_admin'].includes(role ?? '')) {
+    redirect('/login');
   }
 
   return (
-    <div className="min-h-screen bg-fog">
-      <header className="border-b border-silver-mist bg-snow">
-        <div className="mx-auto flex h-11 max-w-[1200px] items-center justify-between px-5">
-          <span className="font-heading text-lg font-semibold tracking-tight text-ink">
-            Admin — TCG Store
-          </span>
-          <span className="text-caption text-graphite">
-            {user.email}
-          </span>
-        </div>
-      </header>
-      <main className="mx-auto max-w-[1200px] px-5 py-10">
+    <div className="flex min-h-screen">
+      <AdminSidebar />
+      <main className="flex-1 p-6">
         {children}
       </main>
+      <Toaster />
     </div>
   );
 }

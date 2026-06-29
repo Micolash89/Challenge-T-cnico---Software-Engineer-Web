@@ -1,5 +1,6 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { preferenceClient } from '@/lib/mercadopago';
 import { createOrder } from '@/services/order.service';
@@ -10,6 +11,84 @@ export interface OrderActionResult {
   error?: string;
   orderId?: string;
   redirectUrl?: string;
+}
+
+export interface UpdateOrderResult {
+  error?: string;
+  success?: boolean;
+}
+
+async function checkAdminAuth(): Promise<UpdateOrderResult | null> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user || !['admin', 'super_admin'].includes(user.user_metadata?.role)) {
+    return { error: 'Unauthorized' };
+  }
+
+  return null;
+}
+
+export async function updateOrderStatusAction(
+  orderId: string,
+  newStatus: 'pagado' | 'cancelado',
+): Promise<UpdateOrderResult> {
+  const authError = await checkAdminAuth();
+  if (authError) return authError;
+
+  const supabase = await createClient();
+
+  // Get current order
+  const { data: order, error: fetchError } = await supabase
+    .from('orders')
+    .select('status')
+    .eq('id', orderId)
+    .single();
+
+  if (fetchError || !order) {
+    return { error: 'Order not found' };
+  }
+
+  if (order.status !== 'reservado') {
+    return { error: 'Only reservado orders can be updated' };
+  }
+
+  if (newStatus === 'pagado') {
+    // Decrement stock inside a transaction via RPC or sequential updates
+    const { data: items, error: itemsError } = await supabase
+      .from('order_items')
+      .select('product_id, quantity')
+      .eq('order_id', orderId);
+
+    if (itemsError) {
+      return { error: itemsError.message };
+    }
+
+    // Update stock for each item
+    for (const item of items ?? []) {
+      const { error: stockError } = await supabase.rpc('decrement_stock', {
+        p_product_id: item.product_id,
+        p_quantity: item.quantity,
+      });
+
+      if (stockError) {
+        return { error: `Stock update failed: ${stockError.message}` };
+      }
+    }
+  }
+
+  const { error: updateError } = await supabase
+    .from('orders')
+    .update({ status: newStatus })
+    .eq('id', orderId);
+
+  if (updateError) {
+    return { error: updateError.message };
+  }
+
+  revalidatePath('/admin/orders');
+  revalidatePath(`/admin/orders/${orderId}`);
+  return { success: true };
 }
 
 export async function createOrderAction(
