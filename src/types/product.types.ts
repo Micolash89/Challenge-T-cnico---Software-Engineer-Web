@@ -1,6 +1,7 @@
 export interface Product {
   id: string;
   name: string;
+  slug: string;
   type: 'card' | 'box';
   img: string;
   price: string;
@@ -12,6 +13,9 @@ export interface Product {
   productId: number;
   stock: number;
   active: boolean;
+  featured: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CartItem extends Product {
