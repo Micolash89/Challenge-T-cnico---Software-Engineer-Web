@@ -52,30 +52,31 @@ export function AdminSidebar() {
             const active = isActive(item.href);
 
             return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setIsOpen(false)}
-                className={cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                  active
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
-                )}
-              >
-                <Icon className="h-4 w-4 shrink-0" />
-                {item.name}
+              <div key={item.href} className="flex items-center gap-1">
+                <Link
+                  href={item.href}
+                  onClick={() => setIsOpen(false)}
+                  className={cn(
+                    'flex flex-1 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                    active
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+                  )}
+                >
+                  <Icon className="h-4 w-4 shrink-0" />
+                  {item.name}
+                </Link>
                 {item.name === S.products && (
                   <Link
                     href="/admin/products/new"
-                    onClick={(e) => e.stopPropagation()}
-                    className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-primary/20 text-primary hover:bg-primary/30"
-                    aria-label={`${ADMIN_I18N.buttons.newProduct}`}
+                    onClick={() => setIsOpen(false)}
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                    aria-label={ADMIN_I18N.buttons.newProduct}
                   >
-                    <Plus className="h-3 w-3" />
+                    <Plus className="h-4 w-4" />
                   </Link>
                 )}
-              </Link>
+              </div>
             );
           })}
         </nav>
