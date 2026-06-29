@@ -8,6 +8,9 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+
+  console.log('ProductCard render', product);
+
   return (
     <Link
       href={productDetailRoute(product.product_line_name, product.name)}
@@ -30,7 +33,8 @@ export function ProductCard({ product }: ProductCardProps) {
           {product.name}
         </h3>
         <span className="text-subheading font-semibold text-ink">
-          ${product.price_ars.toLocaleString('es-AR')}
+          {/* ${product.price_ars.toLocaleString('es-AR')} */}
+          ${product.price}
         </span>
       </div>
     </Link>
