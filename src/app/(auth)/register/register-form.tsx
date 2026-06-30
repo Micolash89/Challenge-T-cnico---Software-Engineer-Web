@@ -2,6 +2,9 @@
 
 import { useActionState } from 'react';
 import { Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { signUpAction } from '@/actions/auth.actions';
 
 export function RegisterForm() {
@@ -16,58 +19,51 @@ export function RegisterForm() {
       )}
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="name" className="text-body-sm font-medium text-ink">
-          Nombre
-        </label>
-        <input
+        <Label htmlFor="name">Nombre</Label>
+        <Input
           id="name"
           name="name"
           type="text"
           autoComplete="name"
           required
           placeholder="Tu nombre"
-          className="rounded-xl border border-silver-mist bg-snow px-4 py-2.5 text-body-sm text-ink outline-none transition-colors placeholder:text-graphite/50 focus:border-ink/30 focus:ring-1 focus:ring-ink/20"
         />
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="email" className="text-body-sm font-medium text-ink">
-          Email
-        </label>
-        <input
+        <Label htmlFor="email">Email</Label>
+        <Input
           id="email"
           name="email"
           type="email"
           autoComplete="email"
           required
           placeholder="tu@email.com"
-          className="rounded-xl border border-silver-mist bg-snow px-4 py-2.5 text-body-sm text-ink outline-none transition-colors placeholder:text-graphite/50 focus:border-ink/30 focus:ring-1 focus:ring-ink/20"
         />
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="password" className="text-body-sm font-medium text-ink">
-          Contraseña
-        </label>
-        <input
+        <Label htmlFor="password">Contraseña</Label>
+        <Input
           id="password"
           name="password"
           type="password"
           autoComplete="new-password"
           required
           placeholder="••••••••"
-          className="rounded-xl border border-silver-mist bg-snow px-4 py-2.5 text-body-sm text-ink outline-none transition-colors placeholder:text-graphite/50 focus:border-ink/30 focus:ring-1 focus:ring-ink/20"
         />
       </div>
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="mt-2 flex items-center justify-center gap-2 rounded-full bg-azure px-6 py-3 text-body-sm font-medium text-snow transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        {pending && <Loader2 className="size-4 animate-spin" />}
-        {pending ? 'Creando cuenta...' : 'Crear cuenta'}
-      </button>
+      <Button type="submit" disabled={pending} className="mt-2 w-full">
+        {pending ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Creando cuenta...
+          </>
+        ) : (
+          'Crear cuenta'
+        )}
+      </Button>
     </form>
   );
 }

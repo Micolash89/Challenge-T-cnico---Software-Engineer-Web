@@ -1,32 +1,44 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { LayoutDashboard, Package, ShoppingCart, LogOut, Store, Plus, Users } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { ADMIN_I18N } from '@/constants/admin-i18n.constants';
-import { signOutAction } from '@/actions/auth.actions';
+import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { motion } from "framer-motion";
+import {
+  LayoutDashboard,
+  Package,
+  ShoppingCart,
+  LogOut,
+  Store,
+  Plus,
+  Users,
+  Menu,
+  X,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { ADMIN_I18N } from "@/constants/admin-i18n.constants";
+import { signOutAction } from "@/actions/auth.actions";
 import {
   containerVariantsCascade,
   variantsParams,
-} from '@/lib/animation-variants';
+} from "@/lib/animation-variants";
+import Image from "next/image";
 
 const S = ADMIN_I18N.sidebar;
 
 const navigation = [
-  { name: S.dashboard, href: '/admin/dashboard', icon: LayoutDashboard },
-  { name: S.products, href: '/admin/products', icon: Package },
-  { name: S.orders, href: '/admin/orders', icon: ShoppingCart },
-  { name: S.users, href: '/admin/users', icon: Users },
+  { name: S.dashboard, href: "/admin/dashboard", icon: LayoutDashboard },
+  { name: S.products, href: "/admin/products", icon: Package },
+  { name: S.orders, href: "/admin/orders", icon: ShoppingCart },
+  { name: S.users, href: "/admin/users", icon: Users },
 ];
 
 export function AdminSidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
 
-  const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
+  const isActive = (href: string) =>
+    pathname === href || pathname.startsWith(href + "/");
 
   return (
     <>
@@ -41,13 +53,21 @@ export function AdminSidebar() {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed left-0 top-0 z-50 flex h-full w-64 flex-col border-r bg-card transition-transform duration-200 md:static md:translate-x-0',
-          isOpen ? 'translate-x-0' : '-translate-x-full',
+          "fixed left-0 top-0 z-50 flex h-screen w-64 flex-col border-r bg-card transition-transform duration-200 md:static md:translate-x-0 ",
+          isOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        {/* Header */}
-        <div className="flex h-16 items-center border-b px-6">
-          <h2 className="text-lg font-semibold">Panel Admin</h2>
+        {/* Header with branding */}
+        <div className="relative flex h-13 items-center justify-between border-b px-6">
+          <h2 className="text-lg font-semibold">La Rata Duelista</h2>
+          <Image
+            src="/images/rata-duelista-logo-1.jpg"
+            alt="Logo"
+            width={40}
+            height={40}
+            className="cursor-pointer rounded-2xl"
+            priority
+          />
         </div>
 
         {/* Navigation */}
@@ -71,25 +91,15 @@ export function AdminSidebar() {
                   href={item.href}
                   onClick={() => setIsOpen(false)}
                   className={cn(
-                    'flex flex-1 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                    "flex flex-1 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                     active
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
                   )}
                 >
-                  <Icon className="h-4 w-4 shrink-0" />
+                  <Icon className="size-5 shrink-0" />
                   {item.name}
                 </Link>
-                {item.name === S.products && (
-                  <Link
-                    href="/admin/products/new"
-                    onClick={() => setIsOpen(false)}
-                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                    aria-label={ADMIN_I18N.buttons.newProduct}
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Link>
-                )}
               </motion.div>
             );
           })}
@@ -101,7 +111,7 @@ export function AdminSidebar() {
             href="/"
             className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
           >
-            <Store className="h-4 w-4 shrink-0" />
+            <Store className="size-5 shrink-0" />
             {S.backToStore}
           </Link>
 
@@ -110,7 +120,7 @@ export function AdminSidebar() {
               type="submit"
               className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
             >
-              <LogOut className="h-4 w-4 shrink-0" />
+              <LogOut className="size-5 shrink-0" />
               {S.logout}
             </button>
           </form>
@@ -121,20 +131,9 @@ export function AdminSidebar() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="fixed left-2 top-2 z-50 flex h-9 w-9 items-center justify-center rounded-md bg-background shadow-md md:hidden"
-        aria-label={isOpen ? 'Cerrar menú' : 'Abrir menú'}
+        aria-label={isOpen ? "Cerrar menú" : "Abrir menú"}
       >
-        <svg
-          className="h-5 w-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          {isOpen ? (
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          ) : (
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-          )}
-        </svg>
+        {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </button>
     </>
   );

@@ -1,6 +1,13 @@
 import Link from 'next/link';
 import { ROUTES } from '@/constants/routes.constants';
 import { RegisterForm } from './register-form';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 
 export const metadata = {
   title: 'Crear cuenta — TCG Store',
@@ -8,15 +15,14 @@ export const metadata = {
 
 export default function RegisterPage() {
   return (
-    <div className="w-full max-w-sm">
-      <div className="rounded-3xl bg-snow p-8">
-        <h1 className="mb-1 font-heading text-heading-sm font-semibold text-ink">
-          Crear cuenta
-        </h1>
-        <p className="mb-8 text-body-sm text-graphite">
+    <Card className="w-full max-w-sm">
+      <CardHeader>
+        <CardTitle className="text-center">Crear cuenta</CardTitle>
+        <CardDescription className="text-center">
           Registrate para empezar a comprar
-        </p>
-
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
         <RegisterForm />
 
         <p className="mt-6 text-center text-body-sm text-graphite">
@@ -28,7 +34,7 @@ export default function RegisterPage() {
             Iniciar sesión
           </Link>
         </p>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

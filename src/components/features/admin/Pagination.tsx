@@ -82,7 +82,7 @@ export function Pagination({
       {/* First page */}
       <Button
         variant="outline"
-        size="icon"
+        size="icon-sm"
         asChild
         aria-disabled={isFirst}
       >
@@ -91,23 +91,24 @@ export function Pagination({
           aria-label="Primera página"
           tabIndex={isFirst ? -1 : 0}
         >
-          <ChevronsLeft className="h-4 w-4" />
+          <ChevronsLeft className="size-5" />
         </Link>
       </Button>
 
       {/* Previous page */}
       <Button
         variant="outline"
-        size="icon"
+        size="icon-sm"
         asChild
         aria-disabled={isFirst}
+        className ="bg-white"
       >
         <Link
           href={buildHref(basePath, currentPage - 1, params)}
           aria-label="Página anterior"
           tabIndex={isFirst ? -1 : 0}
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="size-5" />
         </Link>
       </Button>
 
@@ -141,7 +142,7 @@ export function Pagination({
       {/* Next page */}
       <Button
         variant="outline"
-        size="icon"
+        size="icon-sm"
         asChild
         aria-disabled={isLast}
       >
@@ -150,14 +151,14 @@ export function Pagination({
           aria-label="Página siguiente"
           tabIndex={isLast ? -1 : 0}
         >
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="size-5" />
         </Link>
       </Button>
 
       {/* Last page */}
       <Button
         variant="outline"
-        size="icon"
+        size="icon-sm"
         asChild
         aria-disabled={isLast}
       >
@@ -166,7 +167,7 @@ export function Pagination({
           aria-label="Última página"
           tabIndex={isLast ? -1 : 0}
         >
-          <ChevronsRight className="h-4 w-4" />
+          <ChevronsRight className="size-5" />
         </Link>
       </Button>
     </nav>

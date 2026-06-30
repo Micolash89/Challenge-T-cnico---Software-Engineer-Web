@@ -144,27 +144,28 @@ export async function createOrderAction(
   const { data: { user } } = await supabase.auth.getUser();
   const userId = user?.id ?? null;
 
-  const order = await createOrder({
-    userId,
-    paymentMethod: parsed.data.paymentMethod,
-    totalArs: parsed.data.total,
-    items: parsed.data.items.map((item) => ({
-      productId: item.id,
-      quantity: item.quantity,
-      priceArs: item.price_ars,
-      name: item.name,
-      img: item.img,
-      rarity: item.rarity,
-    })),
-  });
-
   if (paymentMethod === 'whatsapp_efectivo') {
+    const order = await createOrder({
+      userId,
+      paymentMethod: parsed.data.paymentMethod,
+      totalArs: parsed.data.total,
+      items: parsed.data.items.map((item) => ({
+        productId: item.id,
+        quantity: item.quantity,
+        priceArs: item.price_ars,
+        name: item.name,
+        img: item.img,
+        rarity: item.rarity,
+      })),
+    });
+
     return {
       orderId: order.id,
       redirectUrl: `/checkout/reservation?order=${order.id}`,
     };
   }
 
+  // For MP: create preference first, only create order if it succeeds
   try {
     const mpPreference = await preferenceClient.create({
       body: {
@@ -179,9 +180,9 @@ export async function createOrderAction(
             currency_id: 'ARS',
           };
         }),
-        external_reference: order.id,
+        external_reference: 'pending',
         back_urls: {
-          success: `${process.env.NEXT_PUBLIC_URL}/checkout/success?order_id=${order.id}`,
+          success: `${process.env.NEXT_PUBLIC_URL}/checkout/success`,
           failure: `${process.env.NEXT_PUBLIC_URL}/checkout/failure`,
           pending: `${process.env.NEXT_PUBLIC_URL}/checkout/pending`,
         },
@@ -190,13 +191,27 @@ export async function createOrderAction(
       },
     });
 
+    const order = await createOrder({
+      userId,
+      paymentMethod: parsed.data.paymentMethod,
+      totalArs: parsed.data.total,
+      items: parsed.data.items.map((item) => ({
+        productId: item.id,
+        quantity: item.quantity,
+        priceArs: item.price_ars,
+        name: item.name,
+        img: item.img,
+        rarity: item.rarity,
+      })),
+    });
+
     return {
       orderId: order.id,
       redirectUrl: mpPreference.init_point,
     };
   } catch (err) {
     console.error('MP preference error:', err);
-    return { error: 'Error al crear la preferencia de pago' };
+    return { error: 'Error al crear la preferencia de pago. No se generó el pedido.' };
   }
 }
 
