@@ -132,11 +132,11 @@ export function ProductForm({
       {/* Product line + Product ID row */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="productLineName">{F.productLine}</Label>
+          <Label htmlFor="product_line_name">{F.productLine}</Label>
           <Input
-            id="productLineName"
-            name="productLineName"
-            defaultValue={defaultValues.productLineName as string}
+            id="product_line_name"
+            name="product_line_name"
+            defaultValue={defaultValues.product_line_name as string}
             className={inputClass}
           />
         </div>

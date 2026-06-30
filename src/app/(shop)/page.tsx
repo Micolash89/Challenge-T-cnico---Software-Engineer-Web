@@ -4,7 +4,7 @@ import { TopProductsGrid } from '@/components/features/home/TopProductsGrid';
 export default function HomePage() {
   return (
     <div className="flex flex-col">
-      <HeroCarousel />
+      <HeroCarousel images={["/images/justice-hunters.webp", "/images/Yu-Gi-Oh_Banner.webp", "/images/digimon-card-banner.jpg"]} />
       <section className="mx-auto w-full max-w-[1200px] px-5 py-20">
         <h2 className="font-heading text-heading-sm font-semibold text-ink">
           Productos destacados

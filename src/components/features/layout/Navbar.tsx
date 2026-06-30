@@ -1,23 +1,32 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { ShoppingBag } from 'lucide-react';
-import { useCartStore } from '@/hooks/useCartStore';
-import { CartDrawer } from '@/components/features/cart/CartDrawer';
-import { ROUTES } from '@/constants/routes.constants';
+import { useState } from "react";
+import Link from "next/link";
+import { ShoppingBag, LogIn, LogOut, LayoutDashboard } from "lucide-react";
+import { useCartStore } from "@/hooks/useCartStore";
+import { CartDrawer } from "@/components/features/cart/CartDrawer";
+import { ROUTES } from "@/constants/routes.constants";
+import { signOutAction } from "@/actions/auth.actions";
+import Image from "next/image";
 
 const NAV_LINKS = [
-  { label: 'Yu-Gi-Oh!', href: '/yugioh' },
-  { label: 'Pokémon', href: '/pokemon' },
-  { label: 'MTG', href: '/mtg' },
+  { label: "Yu-Gi-Oh!", href: "/yugioh" },
+  { label: "Pokémon", href: "/pokemon" },
+  { label: "MTG", href: "/mtg" },
 ] as const;
 
-export function Navbar() {
+interface NavbarProps {
+  isAuthenticated: boolean;
+  isAdmin: boolean;
+}
+
+export function Navbar({ isAuthenticated, isAdmin }: NavbarProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const itemCount = useCartStore((state) =>
     state.items.reduce((sum, item) => sum + item.quantity, 0),
   );
+
+
 
   return (
     <>
@@ -26,9 +35,17 @@ export function Navbar() {
           {/* Logo */}
           <Link
             href={ROUTES.HOME}
-            className="font-heading text-lg font-semibold tracking-tight text-ink"
+            className="font-heading text-lg font-semibold tracking-tight text-ink flex items-center gap-2"
           >
-            TCG Store
+            <Image
+              src="/images/rata-duelista-logo-1.jpg"
+              alt="Logo"
+              width={40}
+              height={40}
+              className="cursor-pointer rounded-2xl"
+              priority
+            />
+            <span>TCG Store</span>
           </Link>
 
           {/* Nav Links */}
@@ -44,18 +61,55 @@ export function Navbar() {
             ))}
           </nav>
 
-          {/* Cart */}
-          <button
-            onClick={() => setDrawerOpen(true)}
-            className="relative flex cursor-pointer items-center gap-1 text-ink/80 transition-colors hover:text-ink"
-          >
-            <ShoppingBag className="size-5" />
-            {itemCount > 0 && (
-              <span className="flex size-4 items-center justify-center rounded-full bg-ink text-[10px] font-medium text-snow">
-                {itemCount}
-              </span>
+          {/* Actions */}
+          <div className="flex items-center gap-4">
+            {isAdmin && (
+              <Link
+                href={ROUTES.ADMIN.DASHBOARD}
+                title="Ir al dashboard"
+                className="flex items-center gap-1.5 text-[13px] font-medium text-ink/80 transition-colors hover:text-ink"
+              >
+                <LayoutDashboard className="size-[18px]" />
+                <span className="hidden sm:inline">Dashboard</span>
+              </Link>
             )}
-          </button>
+
+            {isAuthenticated ? (
+              <form action={signOutAction}>
+                <button
+                  type="submit"
+                  title="Cerrar sesión"
+                  className="flex cursor-pointer items-center gap-1.5 text-[13px] font-medium text-ink/80 transition-colors hover:text-ink"
+                >
+                  <LogOut className="size-[18px]" />
+                  <span className="hidden sm:inline">Salir</span>
+                </button>
+              </form>
+            ) : (
+              <Link
+                href={ROUTES.LOGIN}
+                title="Iniciar sesión"
+                className="flex items-center gap-1.5 text-[13px] font-medium text-ink/80 transition-colors hover:text-ink"
+              >
+                <LogIn className="size-[18px]" />
+                <span className="hidden sm:inline">Ingresar</span>
+              </Link>
+            )}
+
+            {/* Cart */}
+            <button
+              onClick={() => setDrawerOpen(true)}
+              title="Carrito"
+              className="relative flex cursor-pointer items-center gap-1 text-ink/80 transition-colors hover:text-ink "
+            >
+              <ShoppingBag className="size-6" />
+              {itemCount > 0 && (
+                <span className="flex size-3 items-center justify-center rounded-full bg-ink text-[10px] font-medium text-snow absolute bottom-0 right-0  bg-red-600">
+                  {itemCount}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
       </header>
 

@@ -1,19 +1,19 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-import { getProductBySlug } from '@/services/product.service';
+import { getProductById } from '@/services/product.service';
 import { VALID_PRODUCT_LINES } from '@/constants/database.constants';
 
 export const dynamic = 'force-dynamic';
 
 interface ProductDetailPageProps {
-  params: Promise<{ product_line_name: string; slug: string }>;
+  params: Promise<{ product_line_name: string; id: string }>;
 }
 
 export async function generateMetadata({
   params,
 }: ProductDetailPageProps) {
-  const { product_line_name, slug } = await params;
-  const product = await getProductBySlug(product_line_name, slug);
+  const { product_line_name, id } = await params;
+  const product = await getProductById(product_line_name, id);
 
   if (!product) {
     return { title: 'Producto no encontrado' };
@@ -28,13 +28,14 @@ export async function generateMetadata({
 export default async function ProductDetailPage({
   params,
 }: ProductDetailPageProps) {
-  const { product_line_name, slug } = await params;
+  const { product_line_name, id } = await params;
 
   if (!VALID_PRODUCT_LINES.includes(product_line_name as typeof VALID_PRODUCT_LINES[number])) {
     notFound();
   }
 
-  const product = await getProductBySlug(product_line_name, slug);
+  const product = await getProductById(product_line_name, id);
+
 
   if (!product) {
     notFound();

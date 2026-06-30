@@ -34,7 +34,7 @@ export default async function EditProductPage({ params }: PageProps) {
     rarityCode: product.rarity_code,
     price: product.price,
     priceArs: product.price_ars,
-    productLineName: product.product_line_name,
+    product_line_name: product.product_line_name,
     productId: product.productId,
     img: product.img,
     stock: product.stock,

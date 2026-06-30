@@ -18,6 +18,7 @@ function getDb() {
   return _db;
 }
 
+
 export function db() {
   return getDb();
 }

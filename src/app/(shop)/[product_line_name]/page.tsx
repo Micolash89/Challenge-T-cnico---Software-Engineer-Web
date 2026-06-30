@@ -3,6 +3,7 @@ import { ProductGrid } from '@/components/features/catalog/ProductGrid';
 import { CatalogFilters } from '@/components/features/catalog/CatalogFilters';
 import { getProductsByLine, getProductSorts } from '@/services/product.service';
 import { VALID_PRODUCT_LINES } from '@/constants/database.constants';
+//import { Pagination } from '@/components/features/catalog/Pagination';
 
 export const dynamic = 'force-dynamic';
 
@@ -75,6 +76,9 @@ export default async function CatalogPage({
 
       {/* Grid */}
       <ProductGrid products={products.data} />
+
+      {/* Pagination */}
+      {/* <Pagination currentPage={products.page} totalPages={products.totalPages} /> */}
     </div>
   );
 }

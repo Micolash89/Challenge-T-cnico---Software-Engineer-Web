@@ -8,12 +8,12 @@ function buildCartItem(product: Product, quantity = 1): CartItem {
   return {
     ...product,
     quantity,
-    cost: product.price_ars * quantity,
+    cost: parseFloat((Number(product.price) * Number(quantity)).toFixed(2)) ,
   };
 }
 
 function recalcCost(item: CartItem): CartItem {
-  return { ...item, cost: item.price_ars * item.quantity };
+  return { ...item, cost:  parseFloat((Number(item.price) * Number(item.quantity)).toFixed(2))};
 }
 
 interface CartStore {
@@ -40,7 +40,7 @@ export const useCartStore = create<CartStore>()(
                 item.id === product.id
                   ? recalcCost({
                       ...item,
-                      quantity: item.quantity + quantity,
+                      quantity: Number(item.quantity) + Number(quantity),
                     })
                   : item,
               ),
@@ -63,7 +63,7 @@ export const useCartStore = create<CartStore>()(
           }
           return {
             items: state.items.map((item) =>
-              item.id === productId ? recalcCost({ ...item, quantity }) : item,
+              item.id === productId ? recalcCost({ ...item, quantity: Number(quantity) }) : item,
             ),
           };
         }),

@@ -19,6 +19,6 @@ export function catalogRoute(productLine: string): string {
   return `/${productLine}`;
 }
 
-export function productDetailRoute(productLine: string, slug: string): string {
-  return `/${productLine}/${slug}`;
+export function productDetailRoute(productLine: string, id: string): string {
+  return `/${productLine}/${id}`;
 }
