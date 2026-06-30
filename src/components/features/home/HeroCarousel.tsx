@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import { motion } from 'framer-motion';
 import {
   Carousel,
   CarouselContent,
@@ -11,6 +12,7 @@ import {
   type CarouselApi,
 } from '@/components/ui/carousel';
 import { HERO_CAROUSEL_IMAGES } from '@/constants/carousel.constants';
+import { variantsNormalUpDown } from '@/lib/animation-variants';
 
 interface HeroCarouselProps {
   images?: string[];
@@ -66,7 +68,12 @@ export function HeroCarousel({
   }
 
   return (
-    <section className="relative mb-8">
+    <motion.section
+      variants={variantsNormalUpDown}
+      initial="hidden"
+      animate="visible"
+      className="relative mb-8"
+    >
       <Carousel
         opts={{ loop: true, align: 'start' }}
         setApi={setApi}
@@ -112,6 +119,6 @@ export function HeroCarousel({
           </>
         )}
       </Carousel>
-    </section>
+    </motion.section>
   );
 }

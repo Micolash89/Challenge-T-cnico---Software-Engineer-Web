@@ -17,7 +17,7 @@ export default function AddCartButton({ product }: { product: Product }) {
 
   return (
     <Button
-      className="mx-4 my-4 mt-auto h-10 w-full rounded-md bg-primary text-sm font-semibold text-white hover:bg-primary/90 hover:cursor-pointer"
+      className=" my-4 mt-auto h-10 w-full rounded-md bg-primary text-sm font-semibold text-white hover:bg-primary/90 hover:cursor-pointer"
       onClick={handleAddToCart}
     >
       <Plus className="mr-2 size-6" />

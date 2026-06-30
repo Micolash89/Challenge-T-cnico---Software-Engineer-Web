@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { motion } from "framer-motion";
 import {
   ShoppingBag,
   LogIn,
@@ -22,6 +23,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { variantsNormalUpDown } from "@/lib/animation-variants";
 
 const NAV_LINKS = [
   { label: "Yu-Gi-Oh!", href: "/yugioh" },
@@ -41,7 +43,12 @@ export function Navbar({ isAuthenticated, isAdmin }: NavbarProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b border-silver-mist bg-fog/80 backdrop-blur-xl">
+      <motion.header
+        variants={variantsNormalUpDown}
+        initial="hidden"
+        animate="visible"
+        className="sticky top-0 z-50 w-full border-b border-silver-mist bg-fog/80 backdrop-blur-xl"
+      >
         <div className="mx-auto flex h-11 max-w-[1200px] items-center justify-between px-5">
           {/* Mobile: Hamburger */}
           <div className="flex md:hidden">
@@ -211,7 +218,7 @@ export function Navbar({ isAuthenticated, isAdmin }: NavbarProps) {
             </button>
           </div>
         </div>
-      </header>
+      </motion.header>
 
       <CartDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
     </>

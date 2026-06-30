@@ -1,7 +1,6 @@
 import { Breadcrumbs } from '@/components/features/admin/Breadcrumbs';
 import { Pagination } from '@/components/features/admin/Pagination';
-import { OrderActions } from '@/components/features/admin/OrderActions';
-import { Badge } from '@/components/ui/badge';
+import { OrdersTable } from '@/components/features/admin/OrdersTable';
 import { ADMIN_I18N } from '@/constants/admin-i18n.constants';
 import { getOrdersList } from '@/actions/admin.actions';
 
@@ -12,15 +11,6 @@ export const metadata = {
 interface PageProps {
   searchParams: Promise<{ page?: string; status?: string }>;
 }
-
-const T = ADMIN_I18N.tables;
-const S = ADMIN_I18N.statuses;
-
-const STATUS_VARIANTS: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-  reservado: 'secondary',
-  pagado: 'default',
-  cancelado: 'destructive',
-};
 
 export default async function OrdersPage({ searchParams }: PageProps) {
   const sp = await searchParams;
@@ -85,48 +75,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
         <p className="text-muted-foreground">{ADMIN_I18N.empty.noOrders}</p>
       ) : (
         <>
-          <div className="rounded-xl border bg-card">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">{T.product}</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">{T.total}</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">{T.status}</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">{T.paymentMethod}</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">{T.date}</th>
-                  <th className="px-4 py-3 text-right text-sm font-medium text-muted-foreground">{T.actions}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {orders.map((order: Record<string, unknown>, index: number) => (
-                  <tr
-                    key={order.id as string}
-                    className={index % 2 === 1 ? 'bg-muted/30' : 'bg-white'}
-                  >
-                    <td className="px-4 py-3 text-sm">Pedido #{String(order.id).slice(0, 8)}</td>
-                    <td className="px-4 py-3 text-sm">${Number(order.total_ars).toLocaleString()}</td>
-                    <td className="px-4 py-3">
-                      <Badge variant={STATUS_VARIANTS[order.status as string] ?? 'outline'}>
-                        {S[order.status as keyof typeof S] ?? String(order.status)}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-muted-foreground">
-                      {String(order.payment_method ?? order.paymentMethod)}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-muted-foreground">
-                      {new Date(String(order.created_at ?? order.createdAt)).toLocaleDateString()}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <OrderActions
-                        orderId={order.id as string}
-                        status={(order.status as 'reservado' | 'pagado' | 'cancelado') ?? 'reservado'}
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <OrdersTable orders={orders} />
 
           <Pagination
             currentPage={currentPage}

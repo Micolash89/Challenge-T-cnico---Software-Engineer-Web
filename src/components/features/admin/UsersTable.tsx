@@ -1,8 +1,15 @@
+"use client";
+
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ADMIN_I18N } from '@/constants/admin-i18n.constants';
 import { UserRoleBadge } from './UserRoleBadge';
+import {
+  containerVariantsCascade,
+  variantsParams,
+} from '@/lib/animation-variants';
 
 interface User {
   id: string;
@@ -19,7 +26,12 @@ const T = ADMIN_I18N.tables;
 
 export function UsersTable({ users }: UsersTableProps) {
   return (
-    <div className="rounded-xl border bg-card">
+    <motion.div
+      variants={containerVariantsCascade}
+      initial="hidden"
+      animate="visible"
+      className="rounded-xl border bg-card"
+    >
       <table className="w-full">
         <thead>
           <tr className="border-b">
@@ -31,8 +43,9 @@ export function UsersTable({ users }: UsersTableProps) {
         </thead>
         <tbody>
           {users.map((user, index) => (
-            <tr
+            <motion.tr
               key={user.id}
+              variants={variantsParams("y", 0.35, index * 0.06, 12)}
               className={index % 2 === 1 ? 'bg-muted/30' : 'bg-white'}
             >
               <td className="px-4 py-3 text-sm">{user.name ?? '—'}</td>
@@ -47,10 +60,10 @@ export function UsersTable({ users }: UsersTableProps) {
                   </Link>
                 </Button>
               </td>
-            </tr>
+            </motion.tr>
           ))}
         </tbody>
       </table>
-    </div>
+    </motion.div>
   );
 }

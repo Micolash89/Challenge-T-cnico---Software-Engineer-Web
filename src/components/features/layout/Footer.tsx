@@ -1,4 +1,8 @@
+'use client';
+
+import { motion } from 'framer-motion';
 import { Globe } from 'lucide-react';
+import { variantsNormalUpDown } from '@/lib/animation-variants';
 
 function LinkedinIcon({ className }: { className?: string }) {
   return (
@@ -46,7 +50,12 @@ const SOCIAL_LINKS = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-silver-mist bg-snow">
+    <motion.footer
+      variants={variantsNormalUpDown}
+      initial="hidden"
+      animate="visible"
+      className="border-t border-silver-mist bg-snow"
+    >
       <div className="mx-auto flex max-w-300 flex-col items-center gap-6 px-5 py-8 md:flex-row md:justify-between">
         <p className="text-body-sm text-graphite">
           &copy; {new Date().getFullYear()} TCG Store. Todos los derechos
@@ -70,6 +79,6 @@ export function Footer() {
           ))}
         </div>
       </div>
-    </footer>
+    </motion.footer>
   );
 }

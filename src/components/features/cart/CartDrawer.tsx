@@ -1,11 +1,16 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { motion } from "framer-motion";
 import { X,  ShoppingBag, ShoppingBagIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCartStore } from "@/hooks/useCartStore";
 import { ROUTES } from "@/constants/routes.constants";
+import {
+  containerVariantsCascade,
+  variantsParams,
+} from "@/lib/animation-variants";
 import LessCartButton from "./LessCartButton";
 import PlusCartButton from "./PlusCartButton";
 import RemoveItemCartButton from "./RemoveItemButton";
@@ -96,10 +101,16 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
         {items.length > 0 && (
           <>
             <div className="flex-1 overflow-y-auto px-5 py-4">
-              <ul className="flex flex-col gap-4">
-                {items.map((item) => (
-                  <li
+              <motion.ul
+                variants={containerVariantsCascade}
+                initial="hidden"
+                animate="visible"
+                className="flex flex-col gap-4"
+              >
+                {items.map((item, index) => (
+                  <motion.li
                     key={item.id}
+                    variants={variantsParams("y", 0.4, index * 0.08, 15)}
                     className="flex gap-4 rounded-lg bg-fog p-3"
                   >
                     {/* Image */}
@@ -146,9 +157,9 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
                         </div>
                       </div>
                     </div>
-                  </li>
+                  </motion.li>
                 ))}
-              </ul>
+              </motion.ul>
             </div>
 
             {/* Footer */}
