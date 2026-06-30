@@ -44,24 +44,34 @@ export function ProductCard({ product }: ProductCardProps) {
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             className={`object-contain p-4 transition-transform duration-500 group-hover:scale-105 ${isOutOfStock ? "opacity-70" : ""}`}
+            priority
           />
 
           <Badge
             className="absolute top-2 left-2 text-xs font-bold px-2 py-1 cursor-default z-10"
-            style={{ backgroundColor: getRarityColor(product.rarity), color: "#fff" }}
+            style={{
+              backgroundColor: getRarityColor(product.rarity),
+              color: "#fff",
+            }}
           >
             {product.rarity}
           </Badge>
 
           {isLowStock && (
-            <Badge variant="secondary" className="absolute bottom-2 right-2 text-xs cursor-default z-10">
+            <Badge
+              variant="secondary"
+              className="absolute bottom-2 right-2 text-xs cursor-default z-10"
+            >
               ¡Últimas {product.stock}!
             </Badge>
           )}
 
           {isOutOfStock && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/40 z-20">
-              <Badge variant="destructive" className="px-4 py-2 rounded-full font-bold text-sm">
+              <Badge
+                variant="destructive"
+                className="px-4 py-2 rounded-full font-bold text-sm"
+              >
                 SIN STOCK
               </Badge>
             </div>

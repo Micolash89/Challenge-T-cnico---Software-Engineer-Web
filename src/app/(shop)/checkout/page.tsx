@@ -1,16 +1,20 @@
-'use client';
+"use client";
 
-import { useActionState, useState, useEffect } from 'react';
-import Image from 'next/image';
-import { Loader2, ArrowLeft, ShoppingBag } from 'lucide-react';
-import Link from 'next/link';
-import { useCartStore } from '@/hooks/useCartStore';
-import { createOrderAction } from '@/actions/order.actions';
-import { ROUTES } from '@/constants/routes.constants';
+import { useActionState, useState, useEffect } from "react";
+import Image from "next/image";
+import { Loader2, ArrowLeft, ShoppingBag, Banknote } from "lucide-react";
+import Link from "next/link";
+import { useCartStore } from "@/hooks/useCartStore";
+import { createOrderAction } from "@/actions/order.actions";
+import { ROUTES } from "@/constants/routes.constants";
+import EmptyCart from "@/components/features/cart/EmptyCart";
+import LinkShopButton from "@/components/features/cart/LinkShopButton";
 
 export default function CheckoutPage() {
   const { items, clearCart } = useCartStore();
-  const [paymentMethod, setPaymentMethod] = useState<'mercadopago' | 'whatsapp_efectivo'>('mercadopago');
+  const [paymentMethod, setPaymentMethod] = useState<
+    "mercadopago" | "whatsapp_efectivo"
+  >("mercadopago");
   const [state, formAction, pending] = useActionState(createOrderAction, null);
 
   // Redirect when the action returns a URL
@@ -23,42 +27,24 @@ export default function CheckoutPage() {
 
   // If cart is empty, show message
   if (items.length === 0 && !pending) {
-    return (
-      <div className="mx-auto flex min-h-[60vh] w-full max-w-[1200px] flex-col items-center justify-center gap-4 px-5">
-        <div className="flex size-20 items-center justify-center rounded-full bg-fog">
-          <ShoppingBag className="size-10 text-graphite" />
-        </div>
-        <h1 className="font-heading text-heading-sm font-semibold text-ink">
-          Tu carrito está vacío
-        </h1>
-        <Link
-          href={ROUTES.HOME}
-          className="mt-2 rounded-full bg-azure px-6 py-3 text-body-sm font-medium text-snow"
-        >
-          Ver productos
-        </Link>
-      </div>
-    );
+    return <EmptyCart url={ROUTES.HOME} />;
   }
 
   const total = items.reduce((sum, item) => sum + item.cost, 0);
 
   return (
-    <div className="mx-auto w-full max-w-[1200px] px-5 py-10">
-      <Link
-        href={ROUTES.CART}
-        className="mb-6 flex items-center gap-1 text-body-sm text-graphite transition-colors hover:text-ink"
-      >
-        <ArrowLeft className="size-4" />
-        Volver al carrito
-      </Link>
+    <div className="mx-auto w-full max-w-[1200px] px-5 py-10 relative">
+      <LinkShopButton url={ROUTES.CART} message="volver al carrito" />
 
       <div className="grid gap-10 lg:grid-cols-5 lg:gap-16">
         {/* ── Left: Payment method ── */}
-        <div className="lg:col-span-3">
-          <h1 className="mb-8 font-heading text-heading font-semibold text-ink">
-            Checkout
-          </h1>
+        <div className=" lg:col-span-3">
+          <div className="flex items-center gap-2 ">
+            <Banknote size={50} />
+            <h1 className="mb-8 font-heading text-heading font-semibold text-ink">
+              Checkout
+            </h1>
+          </div>
 
           {/* Error */}
           {state?.error && (
@@ -67,12 +53,8 @@ export default function CheckoutPage() {
             </div>
           )}
 
-          <form action={formAction}>
-            <input
-              type="hidden"
-              name="paymentMethod"
-              value={paymentMethod}
-            />
+          <form action={formAction} className="md:sticky md:top-21"> 
+            <input type="hidden" name="paymentMethod" value={paymentMethod} />
             <input
               type="hidden"
               name="items"
@@ -87,11 +69,7 @@ export default function CheckoutPage() {
                 })),
               )}
             />
-            <input
-              type="hidden"
-              name="total"
-              value={total}
-            />
+            <input type="hidden" name="total" value={total} />
 
             <h2 className="mb-4 font-heading text-subheading font-semibold text-ink">
               Método de pago
@@ -100,20 +78,21 @@ export default function CheckoutPage() {
             <div className="flex flex-col gap-3">
               {/* Mercado Pago */}
               <label
-                className={`flex cursor-pointer items-center gap-4 rounded-2xl border p-4 transition-colors ${
-                  paymentMethod === 'mercadopago'
-                    ? 'border-ink/30 bg-ink/5'
-                    : 'border-silver-mist bg-snow hover:border-ink/20'
+                className={`flex cursor-pointer items-center gap-4 rounded-lg border py-4 px-5 transition-colors justify-between ${
+                  paymentMethod === "mercadopago"
+                    ? "border-ink/30 bg-ink/5"
+                    : "border-silver-mist bg-snow hover:border-ink/20"
                 }`}
               >
                 <input
                   type="radio"
                   name="pm"
                   value="mercadopago"
-                  checked={paymentMethod === 'mercadopago'}
-                  onChange={() => setPaymentMethod('mercadopago')}
-                  className="size-4 accent-ink"
+                  checked={paymentMethod === "mercadopago"}
+                  onChange={() => setPaymentMethod("mercadopago")}
+                  className="size-4 accent-ink hidden"
                 />
+
                 <div className="flex flex-col">
                   <span className="text-body-sm font-medium text-ink">
                     Mercado Pago
@@ -122,31 +101,50 @@ export default function CheckoutPage() {
                     Tarjeta de crédito, débito o efectivo
                   </span>
                 </div>
+                <div className="flex items-center gap-2">
+                  <Image
+                    src="/images/mercadopago-seeklogo.png"
+                    alt="Mercado Pago"
+                    width={40}
+                    height={40}
+                    className="object-contain  h-auto w-auto"
+                  />
+                </div>
               </label>
 
               {/* WhatsApp / Efectivo */}
               <label
-                className={`flex cursor-pointer items-center gap-4 rounded-2xl border p-4 transition-colors ${
-                  paymentMethod === 'whatsapp_efectivo'
-                    ? 'border-ink/30 bg-ink/5'
-                    : 'border-silver-mist bg-snow hover:border-ink/20'
+                className={`flex cursor-pointer items-center gap-4 rounded-lg border py-4 px-5 transition-colors justify-between ${
+                  paymentMethod === "whatsapp_efectivo"
+                    ? "border-ink/30 bg-ink/5"
+                    : "border-silver-mist bg-snow hover:border-ink/20"
                 }`}
               >
                 <input
                   type="radio"
                   name="pm"
                   value="whatsapp_efectivo"
-                  checked={paymentMethod === 'whatsapp_efectivo'}
-                  onChange={() => setPaymentMethod('whatsapp_efectivo')}
-                  className="size-4 accent-ink"
+                  checked={paymentMethod === "whatsapp_efectivo"}
+                  onChange={() => setPaymentMethod("whatsapp_efectivo")}
+                  className="size-4 accent-ink hidden"
                 />
                 <div className="flex flex-col">
-                  <span className="text-body-sm font-medium text-ink">
-                    WhatsApp / Efectivo
+                  <span className="text-body-sm font-medium text-ink capitalize">
+                    Efectivo / deposito bancario
                   </span>
                   <span className="text-caption text-graphite">
-                    Te contactamos por WhatsApp para coordinar el pago
+                    Te contactas por WhatsApp para coordinar el pago/seña y
+                    retiro del producto
                   </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Image
+                    src="/images/icons8-whatsapp-144.png"
+                    alt="WhatsApp"
+                    width={30}
+                    height={30}
+                    className="object-contain  h-auto w-auto"
+                  />
                 </div>
               </label>
             </div>
@@ -155,14 +153,14 @@ export default function CheckoutPage() {
             <button
               type="submit"
               disabled={pending}
-              className="mt-8 flex w-full items-center justify-center gap-2 rounded-full bg-azure px-6 py-3 text-body font-medium text-snow transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+              className="mt-8 flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 text-body font-medium text-snow transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer hover:bg-primary/80"
             >
               {pending && <Loader2 className="size-5 animate-spin" />}
               {pending
-                ? 'Procesando...'
-                : paymentMethod === 'mercadopago'
-                  ? 'Ir a pagar'
-                  : 'Confirmar pedido'}
+                ? "Procesando..."
+                : paymentMethod === "mercadopago"
+                  ? "Ir a pagar"
+                  : "Confirmar pedido"}
             </button>
           </form>
 
@@ -202,7 +200,7 @@ export default function CheckoutPage() {
                       </p>
                     </div>
                     <span className="text-body-sm font-medium text-ink">
-                      ${(item.price_ars * item.quantity).toLocaleString('es-AR')}
+                      ${(Number(item.price) * Number(item.quantity)).toFixed(2)}
                     </span>
                   </div>
                 </div>
@@ -216,7 +214,7 @@ export default function CheckoutPage() {
                 Total
               </span>
               <span className="font-heading text-heading-sm font-semibold text-ink">
-                ${total.toLocaleString('es-AR')}
+                ${total.toLocaleString("es-AR")}
               </span>
             </div>
           </div>

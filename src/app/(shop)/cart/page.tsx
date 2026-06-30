@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Trash2, ShoppingBag, ArrowLeft, ShoppingBagIcon } from "lucide-react";
@@ -10,10 +11,14 @@ import { Button } from "@/components/ui/button";
 import LessCartButton from "@/components/features/cart/LessCartButton";
 import PlusCartButton from "@/components/features/cart/PlusCartButton";
 import RemoveItemCartButton from "@/components/features/cart/RemoveItemButton";
+import { ClearCartModal } from "@/components/features/cart/ClearCartModal";
+import EmptyCart from "@/components/features/cart/EmptyCart";
+import LinkShopButton from "@/components/features/cart/LinkShopButton";
 
 export default function CartPage() {
   const router = useRouter();
   const { items, clearCart } = useCartStore();
+  const [modalOpen, setModalOpen] = useState(false);
 
   const [totalItems, totalCost] = [
     items.reduce((sum, item) => sum + Number(item.quantity), 0),
@@ -21,25 +26,7 @@ export default function CartPage() {
   ];
 
   if (items.length === 0) {
-    return (
-      <div className="mx-auto flex min-h-[60vh] w-full max-w-[1200px] flex-col items-center justify-center gap-4 px-5">
-        <div className="flex size-20 items-center justify-center rounded-full bg-fog">
-          <ShoppingBag className="size-10 text-graphite" />
-        </div>
-        <h1 className="font-heading text-heading-sm font-semibold text-ink">
-          Tu carrito está vacío
-        </h1>
-        <p className="text-body text-graphite">
-          Agregá productos para empezar a comprar
-        </p>
-        <Link
-          href={ROUTES.HOME}
-          className="mt-2 rounded-full bg-azure px-6 py-3 text-body-sm font-medium text-snow transition-opacity hover:opacity-90"
-        >
-          Ver productos
-        </Link>
-      </div>
-    );
+    return <EmptyCart url={ROUTES.HOME} />;
   }
 
   return (
@@ -47,16 +34,7 @@ export default function CartPage() {
       {/* Header */}
       <div className="mb-8 flex items-center justify-between transition-colors">
         <div className="w-full">
-          <Link href={ROUTES.HOME}>
-            <Button
-              variant="default"
-              size="lg"
-              className="flex items-center gap-1 px-3 py-1 hover:bg-black/70 transition-colors  cursor-pointer "
-            >
-              <ArrowLeft className="size-5" />
-              <span>Seguir comprando</span>
-            </Button>
-          </Link>
+          <LinkShopButton url={ROUTES.YUGIOH} message="Seguir comprando" />
           <div className="flex items-center justify-between w-full">
             <div className=" flex  items-center gap-2">
               <h1 className="font-heading text-heading font-semibold text-ink flex items-center gap-2">
@@ -69,7 +47,7 @@ export default function CartPage() {
             </div>
 
             <Button
-              onClick={clearCart}
+              onClick={() => setModalOpen(true)}
               variant="ghost"
               className="bg-white border border-silver-mist text-graphite hover:bg-red-200 hover:text-red-500 transition-colors flex items-center gap-1 px-3 py-1 cursor-pointer "
               size="lg"
@@ -138,7 +116,9 @@ export default function CartPage() {
         <div className="mt-8 h-fit ml-auto flex  max-w-sm flex-col gap-4 rounded-lg bg-snow p-6 md:sticky md:top-15 w-full">
           <div className="flex items-center justify-between ">
             <span className="text-body text-graphite">Subtotal</span>
-            <span className="text-body font-medium text-ink">${totalCost.toLocaleString("es-AR")}</span>
+            <span className="text-body font-medium text-ink">
+              ${totalCost.toLocaleString("es-AR")}
+            </span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-body text-graphite">Envío</span>
@@ -161,6 +141,12 @@ export default function CartPage() {
           </button>
         </div>
       </div>
+
+      <ClearCartModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onConfirm={clearCart}
+      />
     </div>
   );
 }

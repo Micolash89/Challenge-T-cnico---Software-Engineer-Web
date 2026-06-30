@@ -24,7 +24,7 @@ export default async function HomePage() {
           <div className="mt-12 text-center">
             <Link
               href="/yugioh"
-              className="inline-flex items-center gap-2 rounded-full bg-ink px-8 py-3 text-body-sm font-medium text-snow transition-opacity hover:opacity-90"
+              className="inline-flex items-center gap-2 rounded-lg bg-ink px-8 py-3 text-body-sm font-medium text-snow transition-opacity hover:opacity-90"
             >
               Ver más productos
             </Link>

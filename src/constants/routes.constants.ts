@@ -3,6 +3,8 @@ export const ROUTES = {
   CART: '/cart',
   LOGIN: '/login',
   REGISTER: '/register',
+  YUGIOH: '/yugioh',
+  
   ADMIN: {
     ROOT: '/admin',
     DASHBOARD: '/admin/dashboard',

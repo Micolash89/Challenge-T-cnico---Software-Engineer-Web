@@ -23,7 +23,7 @@ export default function AddCartButton({ product }: { product: Product }) {
         disabled
         className="my-4 mt-auto h-10 w-full rounded-md bg-muted text-sm font-semibold text-muted-foreground cursor-not-allowed"
       >
-        <Ban className="mr-2 size-4 text-destructive" />
+        <Ban className="mr-2 size-5 text-destructive" />
         <span>Sin stock</span>
       </Button>
     );
@@ -36,7 +36,7 @@ export default function AddCartButton({ product }: { product: Product }) {
         className="my-4 mt-auto h-10 w-full rounded-md text-sm font-semibold hover:cursor-pointer"
         onClick={handleAddToCart}
       >
-        <Plus className="mr-2 size-4" />
+        <Plus className="mr-2 size-5" />
         <span>Agregar más</span>
       </Button>
     );
@@ -46,8 +46,9 @@ export default function AddCartButton({ product }: { product: Product }) {
     <Button
       className="my-4 mt-auto h-10 w-full rounded-md bg-primary text-sm font-semibold text-white hover:bg-primary/90 hover:cursor-pointer"
       onClick={handleAddToCart}
+
     >
-      <ShoppingCart className="mr-2 size-4" />
+      <ShoppingCart className="mr-2 size-5" />
       <span>Agregar al carrito</span>
     </Button>
   );

@@ -71,7 +71,7 @@ export function Pagination({ currentPage, totalPages }: PaginationProps) {
         className="flex size-9 items-center justify-center rounded-lg border border-silver-mist bg-snow text-graphite transition-colors hover:bg-fog hover:text-ink disabled:cursor-not-allowed disabled:opacity-30"
         aria-label="Primera página"
       >
-        <ChevronsLeft className="size-4" />
+        <ChevronsLeft className="size-5" />
       </button>
 
       <button
@@ -80,7 +80,7 @@ export function Pagination({ currentPage, totalPages }: PaginationProps) {
         className="flex size-9 items-center justify-center rounded-lg border border-silver-mist bg-snow text-graphite transition-colors hover:bg-fog hover:text-ink disabled:cursor-not-allowed disabled:opacity-30"
         aria-label="Página anterior"
       >
-        <ChevronLeft className="size-4" />
+        <ChevronLeft className="size-5" />
       </button>
 
       {start > 1 && (
@@ -136,7 +136,7 @@ export function Pagination({ currentPage, totalPages }: PaginationProps) {
         className="flex size-9 items-center justify-center rounded-lg border border-silver-mist bg-snow text-graphite transition-colors hover:bg-fog hover:text-ink disabled:cursor-not-allowed disabled:opacity-30"
         aria-label="Página siguiente"
       >
-        <ChevronRight className="size-4" />
+        <ChevronRight className="size-5" />
       </button>
 
       <button
@@ -145,7 +145,7 @@ export function Pagination({ currentPage, totalPages }: PaginationProps) {
         className="flex size-9 items-center justify-center rounded-lg border border-silver-mist bg-snow text-graphite transition-colors hover:bg-fog hover:text-ink disabled:cursor-not-allowed disabled:opacity-30"
         aria-label="Última página"
       >
-        <ChevronsRight className="size-4" />
+        <ChevronsRight className="size-5" />
       </button>
     </nav>
   );
