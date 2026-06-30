@@ -1,19 +1,51 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { updateOrderToPaid } from '@/services/order.service';
+import crypto from 'node:crypto';
 
 const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN ?? '';
+const MP_WEBHOOK_SECRET = process.env.MP_WEBHOOK_SECRET ?? '';
 
-/**
- * Mercado Pago webhook — receives payment notifications.
- *
- * Handles both:
- *   - POST with JSON body (type: "payment", data.id)
- *   - GET with query params (topic=merchant_order, id=...)
- */
+function verifySignature(
+  body: Record<string, unknown>,
+  xSignature: string,
+  xRequestId: string,
+): boolean {
+  if (!MP_WEBHOOK_SECRET) return true;
+
+  const parts = Object.fromEntries(
+    xSignature.split(',').map((p) => {
+      const [k, ...v] = p.split('=');
+      return [k.trim(), v.join('=').trim()];
+    }),
+  );
+  const ts = parts['ts'];
+  const receivedV1 = parts['v1'];
+  if (!ts || !receivedV1) return false;
+
+  const dataId = (body.data as Record<string, unknown> | undefined)?.id as string | undefined;
+  if (!dataId) return false;
+
+  const template = `id:${dataId};request-id:${xRequestId};ts:${ts};`;
+  const computedV1 = crypto
+    .createHmac('sha256', MP_WEBHOOK_SECRET)
+    .update(template)
+    .digest('hex');
+
+  return crypto.timingSafeEqual(Buffer.from(computedV1), Buffer.from(receivedV1));
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     console.log('[MP Webhook] POST received:', JSON.stringify(body));
+
+    const xSignature = request.headers.get('x-signature') ?? '';
+    const xRequestId = request.headers.get('x-request-id') ?? '';
+
+    if (!verifySignature(body, xSignature, xRequestId)) {
+      console.warn('[MP Webhook] Invalid signature');
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+    }
 
     const topic = body.type ?? body.action;
     const resourceId = body.data?.id ?? body.data?.resource_id;
@@ -41,7 +73,6 @@ export async function GET(request: NextRequest) {
   console.log(`[MP Webhook] GET received: topic=${topic}, id=${id}`);
 
   if (topic === 'merchant_order' && id) {
-    // We'll process in the background — respond 200 immediately
     void processMerchantOrder(id);
   } else if (topic === 'payment' && id) {
     void processPayment(id);
@@ -105,7 +136,6 @@ async function processMerchantOrder(merchantOrderId: string) {
       `[MP Webhook] Merchant order ${merchantOrderId}: status=${order.status}`,
     );
 
-    // Find approved payments
     const approvedPayment = order.payments?.find(
       (p: { status: string }) => p.status === 'approved',
     );

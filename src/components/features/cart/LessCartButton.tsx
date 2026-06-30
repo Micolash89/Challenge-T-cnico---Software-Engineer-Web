@@ -9,8 +9,8 @@ export default function LessCartButton({ item }: { item: CartItem }) {
     <button
       disabled={item.quantity === 1}
       onClick={() => updateQuantity(item.id, item.quantity - 1)}
-      className={`flex size-7 items-center justify-center rounded-full border border-silver-mist text-graphite transition-colors bg-white hover:bg-fog hover:text-ink cursor-pointer ${
-        item.quantity === 1 ? " opacity-50" : ""
+      className={`flex size-7 items-center justify-center rounded-full border border-silver-mist text-graphite transition-colors bg-white hover:bg-fog hover:text-ink  ${
+        item.quantity === 1 ? " opacity-50 cursor-not-allowed " : " cursor-pointer "
       }`}
       title="restar producto"
     >

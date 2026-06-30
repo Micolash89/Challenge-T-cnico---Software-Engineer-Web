@@ -136,6 +136,9 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
                           <p className="text-caption text-graphite">
                             {item.rarity}
                           </p>
+                          <p className="text-caption text-graphite">
+                            {item.stock} disponibles
+                          </p>
                         </div>
                      <RemoveItemCartButton item={item} />
                       </div>

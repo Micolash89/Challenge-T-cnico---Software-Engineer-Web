@@ -1,4 +1,5 @@
-import { Link, ShoppingBagIcon } from 'lucide-react'
+import Link from 'next/link'
+import { ShoppingBagIcon } from 'lucide-react'
 
 export default function EmptyCart({url}: {url: string}) {
   return (

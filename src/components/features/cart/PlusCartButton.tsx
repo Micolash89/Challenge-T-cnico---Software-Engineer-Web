@@ -8,7 +8,9 @@ export default function PlusCartButton({ item }: { item: CartItem }) {
   return (
     <button
       onClick={() => updateQuantity(item.id, item.quantity + 1)}
-      className="flex size-7 bg-white items-center justify-center rounded-full border border-silver-mist text-graphite transition-colors cursor-pointer  hover:bg-fog hover:text-ink"
+      className={`flex size-7 items-center justify-center rounded-full border border-silver-mist text-graphite transition-colors bg-white hover:bg-fog hover:text-ink  ${
+        item.quantity === item.stock ? " opacity-50 cursor-not-allowed " : " cursor-pointer "
+      }`}
       title="Agregar producto"
       disabled={item.quantity === item.stock}
     >
