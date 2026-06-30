@@ -1,4 +1,4 @@
-import { eq, and, gt, asc, count } from 'drizzle-orm';
+import { eq, and, gt, asc, count, ilike } from 'drizzle-orm';
 import { db as getDb } from '@/db';
 import { products } from '@/db/schema';
 import type { Product, DataProduct, DataSorts } from '@/types/product.types';
@@ -9,6 +9,7 @@ export interface GetProductsParams {
   onlyInStock?: boolean;
   category?: string;
   rarity?: string;
+  search?: string;
   page?: number;
   pageSize?: number;
 }
@@ -21,6 +22,7 @@ export async function getProductsByLine(
     onlyInStock = false,
     category,
     rarity,
+    search,
     page = 1,
     pageSize = 20,
   } = params;
@@ -40,6 +42,10 @@ export async function getProductsByLine(
 
   if (rarity) {
     conditions.push(eq(products.rarity, rarity));
+  }
+
+  if (search) {
+    conditions.push(ilike(products.name, `%${search}%`));
   }
 
   const where = and(...conditions);

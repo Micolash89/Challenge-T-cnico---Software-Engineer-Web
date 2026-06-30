@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { X,  ShoppingBag, ShoppingBagIcon } from "lucide-react";
 import Image from "next/image";
@@ -14,6 +14,7 @@ import {
 import LessCartButton from "./LessCartButton";
 import PlusCartButton from "./PlusCartButton";
 import RemoveItemCartButton from "./RemoveItemButton";
+import { ClearCartModal } from "./ClearCartModal";
 
 interface CartDrawerProps {
   open: boolean;
@@ -22,6 +23,7 @@ interface CartDrawerProps {
 
 export function CartDrawer({ open, onClose }: CartDrawerProps) {
   const { items, clearCart } = useCartStore();
+  const [clearModalOpen, setClearModalOpen] = useState(false);
   const overlayRef = useRef<HTMLDivElement>(null);
 
   // Close on Escape
@@ -174,7 +176,7 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
               </div>
               <div className="flex gap-3">
                 <button
-                  onClick={clearCart}
+                  onClick={() => setClearModalOpen(true)}
                   className="flex-1 rounded-lg border border-silver-mist px-4 py-2.5 text-body-sm font-medium text-graphite transition-colors hover:bg-fog hover:text-ink cursor-pointer"
                 >
                   Vaciar
@@ -191,6 +193,12 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
           </>
         )}
       </div>
+
+      <ClearCartModal
+        open={clearModalOpen}
+        onClose={() => setClearModalOpen(false)}
+        onConfirm={clearCart}
+      />
     </>
   );
 }

@@ -2,6 +2,9 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { getProductById } from '@/services/product.service';
 import { VALID_PRODUCT_LINES } from '@/constants/database.constants';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import AddCartButton from '@/components/features/cart/AddCartButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,6 +25,11 @@ export async function generateMetadata({
   return {
     title: `${product.name} — ${product_line_name.toUpperCase()}`,
     description: `${product.name} — ${product.rarity} de ${product.category}`,
+    openGraph: {
+      title: product.name,
+      description: `${product.name} — ${product.rarity} de ${product.category}`,
+      images: [{ url: product.img }],
+    },
   };
 }
 
@@ -35,7 +43,6 @@ export default async function ProductDetailPage({
   }
 
   const product = await getProductById(product_line_name, id);
-
 
   if (!product) {
     notFound();
@@ -58,14 +65,14 @@ export default async function ProductDetailPage({
 
         {/* ── Info ── */}
         <div className="flex flex-col justify-center gap-6">
-          {/* Rarity */}
+          {/* Badges */}
           <div className="flex items-center gap-3">
-            <span className="rounded-full bg-fog px-4 py-1.5 text-caption font-medium uppercase tracking-wide text-graphite">
+            <Badge variant="secondary" className="text-caption font-medium uppercase tracking-wide">
               {product.rarity}
-            </span>
-            <span className="text-caption font-medium uppercase text-graphite">
+            </Badge>
+            <Badge variant="outline" className="text-caption font-medium uppercase">
               {product.category}
-            </span>
+            </Badge>
           </div>
 
           {/* Name */}
@@ -75,7 +82,7 @@ export default async function ProductDetailPage({
 
           {/* Price */}
           <p className="font-heading text-heading-sm font-semibold text-ink">
-            ${product.price_ars.toLocaleString('es-AR')}
+            ${product.price}
           </p>
 
           {/* Stock */}
@@ -85,16 +92,10 @@ export default async function ProductDetailPage({
               : 'Sin stock'}
           </p>
 
-          {/* Divider */}
-          <div className="h-px bg-silver-mist" />
+          <Separator />
 
           {/* CTA */}
-          <button
-            disabled={product.stock === 0}
-            className="w-full rounded-full bg-azure px-6 py-3 text-body font-medium text-snow transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            {product.stock > 0 ? 'Agregar al carrito' : 'Sin stock'}
-          </button>
+          <AddCartButton product={product} />
         </div>
       </div>
     </div>
