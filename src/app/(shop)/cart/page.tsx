@@ -1,162 +1,178 @@
-'use client';
+"use client";
 
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
-import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
-import { useCartStore } from '@/hooks/useCartStore';
-import { ROUTES } from '@/constants/routes.constants';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { Trash2, ShoppingBagIcon, ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
+import { useCartStore } from "@/hooks/useCartStore";
+import { ROUTES } from "@/constants/routes.constants";
+import { Button } from "@/components/ui/button";
+import LessCartButton from "@/components/features/cart/LessCartButton";
+import PlusCartButton from "@/components/features/cart/PlusCartButton";
+import RemoveItemCartButton from "@/components/features/cart/RemoveItemButton";
+import { ClearCartModal } from "@/components/features/cart/ClearCartModal";
+import EmptyCart from "@/components/features/cart/EmptyCart";
+import LinkShopButton from "@/components/features/cart/LinkShopButton";
+import {
+  variantsNormalDownUp,
+  containerVariantsCascade,
+} from "@/lib/animation-variants";
+
+const itemVariant = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 },
+};
 
 export default function CartPage() {
   const router = useRouter();
-  const { items, updateQuantity, removeItem, clearCart } = useCartStore();
+  const { items, clearCart } = useCartStore();
+  const [modalOpen, setModalOpen] = useState(false);
 
-  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-  const totalCost = items.reduce((sum, item) => sum + item.cost, 0);
+  const [totalItems, totalCost] = [
+    items.reduce((sum, item) => sum + Number(item.quantity), 0),
+    items.reduce((sum, item) => sum + Number(item.cost), 0),
+  ];
 
   if (items.length === 0) {
-    return (
-      <div className="mx-auto flex min-h-[60vh] w-full max-w-[1200px] flex-col items-center justify-center gap-4 px-5">
-        <div className="flex size-20 items-center justify-center rounded-full bg-fog">
-          <ShoppingBag className="size-10 text-graphite" />
-        </div>
-        <h1 className="font-heading text-heading-sm font-semibold text-ink">
-          Tu carrito está vacío
-        </h1>
-        <p className="text-body text-graphite">
-          Agregá productos para empezar a comprar
-        </p>
-        <Link
-          href={ROUTES.HOME}
-          className="mt-2 rounded-full bg-azure px-6 py-3 text-body-sm font-medium text-snow transition-opacity hover:opacity-90"
-        >
-          Ver productos
-        </Link>
-      </div>
-    );
+    return <EmptyCart url={ROUTES.HOME} />;
   }
 
   return (
     <div className="mx-auto w-full max-w-[1200px] px-5 py-10">
-      {/* Header */}
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <Link
-            href={ROUTES.HOME}
-            className="mb-2 flex items-center gap-1 text-body-sm text-graphite transition-colors hover:text-ink"
-          >
-            <ArrowLeft className="size-4" />
-            Seguir comprando
-          </Link>
-          <h1 className="font-heading text-heading font-semibold text-ink">
-            Carrito
-          </h1>
-          <p className="mt-1 text-body-sm text-graphite">
-            {totalItems} {totalItems === 1 ? 'producto' : 'productos'}
-          </p>
-        </div>
-        <button
-          onClick={clearCart}
-          className="rounded-full border border-silver-mist px-4 py-2 text-body-sm font-medium text-graphite transition-colors hover:border-caution/30 hover:text-caution"
-        >
-          Vaciar carrito
-        </button>
-      </div>
-
-      {/* Items */}
-      <div className="flex flex-col gap-4">
-        {items.map((item) => (
-          <div
-            key={item.id}
-            className="flex gap-5 rounded-3xl bg-snow p-5"
-          >
-            {/* Image */}
-            <div className="relative size-24 shrink-0 overflow-hidden rounded-2xl bg-fog">
-              <Image
-                src={item.img}
-                alt={item.name}
-                fill
-                sizes="96px"
-                className="object-contain p-2"
-              />
-            </div>
-
-            {/* Info */}
-            <div className="flex flex-1 flex-col justify-between">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="font-heading text-heading-sm font-semibold text-ink">
-                    {item.name}
-                  </h3>
-                  <p className="text-body-sm text-graphite">
-                    {item.rarity} — {item.category}
-                  </p>
-                </div>
-                <button
-                  onClick={() => removeItem(item.id)}
-                  className="flex size-8 items-center justify-center rounded-full text-graphite transition-colors hover:bg-caution/10 hover:text-caution"
-                >
-                  <Trash2 className="size-4" />
-                </button>
+      <motion.div
+        variants={variantsNormalDownUp}
+        initial="hidden"
+        animate="visible"
+        className="mb-8"
+      >
+        <div className="flex items-center justify-between transition-colors">
+          <div className="w-full">
+            <LinkShopButton url={ROUTES.YUGIOH} message="Seguir comprando" />
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-2">
+                <h1 className="font-heading text-heading font-semibold text-ink flex items-center gap-2">
+                  <ShoppingBagIcon size={35} />
+                  <span>Carrito</span>
+                </h1>
+                <p className="mt-1 text-body-sm text-graphite">
+                  ( {totalItems} {totalItems === 1 ? "producto" : "productos"} )
+                </p>
               </div>
 
-              <div className="flex items-center justify-between">
-                {/* Quantity */}
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                    className="flex size-8 items-center justify-center rounded-full border border-silver-mist text-graphite transition-colors hover:bg-fog hover:text-ink"
-                  >
-                    <Minus className="size-3.5" />
-                  </button>
-                  <span className="w-10 text-center text-body font-medium text-ink">
-                    {item.quantity}
-                  </span>
-                  <button
-                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                    className="flex size-8 items-center justify-center rounded-full border border-silver-mist text-graphite transition-colors hover:bg-fog hover:text-ink"
-                  >
-                    <Plus className="size-3.5" />
-                  </button>
-                </div>
-
-                <span className="font-heading text-subheading font-semibold text-ink">
-                  ${(item.price_ars * item.quantity).toLocaleString('es-AR')}
-                </span>
-              </div>
+              <Button
+                onClick={() => setModalOpen(true)}
+                variant="ghost"
+                className="bg-white border border-silver-mist text-graphite hover:bg-red-200 hover:text-red-500 transition-colors flex items-center gap-1 px-3 py-1 cursor-pointer"
+                size="lg"
+                title="Vaciar Carrito"
+              >
+                <Trash2 className="size-5" />
+                <span>Vaciar carrito</span>
+              </Button>
             </div>
           </div>
-        ))}
+        </div>
+      </motion.div>
+
+      <div className="flex flex-col md:flex-row gap-10 relative">
+        <motion.div
+          variants={containerVariantsCascade}
+          initial="hidden"
+          animate="visible"
+          className="flex flex-col gap-5 w-full"
+        >
+          {items.map((item) => (
+            <motion.div
+              key={item.id}
+              variants={itemVariant}
+              className="flex gap-5 rounded-lg bg-snow py-[6px] px-3"
+            >
+              <div className="relative size-25">
+                <Image
+                  src={item.img}
+                  alt={item.name}
+                  fill
+                  sizes="100px"
+                  className="object-contain p-2"
+                />
+              </div>
+
+              <div className="flex flex-1 flex-col justify-between">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="font-heading text-heading-sm font-semibold text-ink">
+                      {item.name}
+                    </h3>
+                    <p className=" text-xs text-graphite">
+                      {item.rarity} - {item.category} - {" ( "}{item.stock} disponibles{" )"}
+                    </p>
+                  </div>
+                  <RemoveItemCartButton item={item} />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <LessCartButton item={item} />
+                    <span className="w-10 text-center text-body font-medium text-ink">
+                      {item.quantity}
+                    </span>
+                    <PlusCartButton item={item} />
+                  </div>
+
+                  <span className="font-heading text-subheading font-semibold text-ink">
+                    ${(Number(item.price) * Number(item.quantity)).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        <motion.div
+          variants={variantsNormalDownUp}
+          initial="hidden"
+          animate="visible"
+          transition={{ delay: 0.15 }}
+          className="mt-8 h-fit ml-auto flex max-w-sm flex-col gap-4 rounded-lg bg-snow p-6 md:sticky md:top-15 w-full"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-body text-graphite">Subtotal</span>
+            <span className="text-body font-medium text-ink">
+              ${totalCost.toLocaleString("es-AR")}
+            </span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-body text-graphite">Envío</span>
+            <span className="text-body-sm text-graphite">A convenir</span>
+          </div>
+          <div className="h-px bg-silver-mist" />
+          <div className="flex items-center justify-between">
+            <span className="font-heading text-heading-sm font-semibold text-ink">
+              Total
+            </span>
+            <span className="font-heading text-heading-sm font-semibold text-ink">
+              ${totalCost.toLocaleString("es-AR")}
+            </span>
+          </div>
+          <button
+            onClick={() => router.push("/checkout")}
+            className="mt-2 bg-black hover:bg-ink/80 rounded-lg hover:cursor-pointer px-6 py-3 text-body font-medium text-snow transition-opacity hover:opacity-90 flex items-center justify-center"
+          >
+            <span>
+            Continuar compra
+
+            </span>
+            <ArrowRight className="size-5 ml-2 inline-block text-white" />
+          </button>
+        </motion.div>
       </div>
 
-      {/* Summary */}
-      <div className="mt-8 ml-auto flex w-full max-w-sm flex-col gap-4 rounded-3xl bg-snow p-6">
-        <div className="flex items-center justify-between">
-          <span className="text-body text-graphite">Subtotal</span>
-          <span className="text-body font-medium text-ink">
-            ${totalCost.toLocaleString('es-AR')}
-          </span>
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="text-body text-graphite">Envío</span>
-          <span className="text-body-sm text-graphite">A convenir</span>
-        </div>
-        <div className="h-px bg-silver-mist" />
-        <div className="flex items-center justify-between">
-          <span className="font-heading text-heading-sm font-semibold text-ink">
-            Total
-          </span>
-          <span className="font-heading text-heading-sm font-semibold text-ink">
-            ${totalCost.toLocaleString('es-AR')}
-          </span>
-        </div>
-        <button
-          onClick={() => router.push('/checkout')}
-          className="mt-2 rounded-full bg-azure px-6 py-3 text-body font-medium text-snow transition-opacity hover:opacity-90"
-        >
-          Continuar compra
-        </button>
-      </div>
+      <ClearCartModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onConfirm={clearCart}
+      />
     </div>
   );
 }

@@ -3,10 +3,15 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { motion } from 'framer-motion';
 import { LayoutDashboard, Package, ShoppingCart, LogOut, Store, Plus, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ADMIN_I18N } from '@/constants/admin-i18n.constants';
 import { signOutAction } from '@/actions/auth.actions';
+import {
+  containerVariantsCascade,
+  variantsParams,
+} from '@/lib/animation-variants';
 
 const S = ADMIN_I18N.sidebar;
 
@@ -46,13 +51,22 @@ export function AdminSidebar() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-1 p-4">
-          {navigation.map((item) => {
+        <motion.nav
+          variants={containerVariantsCascade}
+          initial="hidden"
+          animate="visible"
+          className="flex-1 space-y-1 p-4"
+        >
+          {navigation.map((item, index) => {
             const Icon = item.icon;
             const active = isActive(item.href);
 
             return (
-              <div key={item.href} className="flex items-center gap-1">
+              <motion.div
+                key={item.href}
+                variants={variantsParams("y", 0.35, index * 0.08, 12)}
+                className="flex items-center gap-1"
+              >
                 <Link
                   href={item.href}
                   onClick={() => setIsOpen(false)}
@@ -76,10 +90,10 @@ export function AdminSidebar() {
                     <Plus className="h-4 w-4" />
                   </Link>
                 )}
-              </div>
+              </motion.div>
             );
           })}
-        </nav>
+        </motion.nav>
 
         {/* Footer */}
         <div className="border-t p-4">

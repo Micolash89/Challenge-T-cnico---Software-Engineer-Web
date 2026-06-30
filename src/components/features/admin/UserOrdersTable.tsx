@@ -1,9 +1,16 @@
+"use client";
+
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ADMIN_I18N } from '@/constants/admin-i18n.constants';
 import { cn } from '@/lib/utils';
+import {
+  containerVariantsCascade,
+  variantsParams,
+} from '@/lib/animation-variants';
 
 interface OrderItem {
   id: string;
@@ -27,7 +34,12 @@ const STATUS_VARIANTS: Record<string, 'default' | 'secondary' | 'destructive' | 
 
 export function UserOrdersTable({ orders }: UserOrdersTableProps) {
   return (
-    <div className="rounded-xl border bg-card">
+    <motion.div
+      variants={containerVariantsCascade}
+      initial="hidden"
+      animate="visible"
+      className="rounded-xl border bg-card"
+    >
       <table className="w-full">
         <thead>
           <tr className="border-b">
@@ -40,8 +52,9 @@ export function UserOrdersTable({ orders }: UserOrdersTableProps) {
         </thead>
         <tbody>
           {orders.map((order, index) => (
-            <tr
+            <motion.tr
               key={order.id}
+              variants={variantsParams("y", 0.35, index * 0.06, 12)}
               className={cn(
                 'border-b last:border-b-0',
                 index % 2 === 1 ? 'bg-muted/30' : 'bg-white',
@@ -67,10 +80,10 @@ export function UserOrdersTable({ orders }: UserOrdersTableProps) {
                   </Link>
                 </Button>
               </td>
-            </tr>
+            </motion.tr>
           ))}
         </tbody>
       </table>
-    </div>
+    </motion.div>
   );
 }

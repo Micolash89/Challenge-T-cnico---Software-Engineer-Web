@@ -3,7 +3,7 @@ import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Breadcrumbs } from '@/components/features/admin/Breadcrumbs';
 import { Pagination } from '@/components/features/admin/Pagination';
-import { DeleteProductButton } from '@/components/features/admin/DeleteProductButton';
+import { ProductsTable } from '@/components/features/admin/ProductsTable';
 import { ADMIN_I18N } from '@/constants/admin-i18n.constants';
 import { getAllProductsAction } from '@/actions/admin.actions';
 
@@ -15,7 +15,6 @@ interface PageProps {
   searchParams: Promise<{ page?: string; category?: string; rarity?: string; stock?: string }>;
 }
 
-const T = ADMIN_I18N.tables;
 const B = ADMIN_I18N.buttons;
 
 export default async function ProductsPage({ searchParams }: PageProps) {
@@ -106,42 +105,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
         <p className="text-muted-foreground">{ADMIN_I18N.empty.noProducts}</p>
       ) : (
         <>
-          <div className="rounded-xl border bg-card">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">{T.name}</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">{T.category}</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">{T.rarity}</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">{T.stock}</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">{T.price}</th>
-                  <th className="px-4 py-3 text-right text-sm font-medium text-muted-foreground">{T.actions}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {productsData.map((product, index) => (
-                  <tr
-                    key={product.id}
-                    className={index % 2 === 1 ? 'bg-muted/30' : 'bg-white'}
-                  >
-                    <td className="px-4 py-3 text-sm font-medium">{product.name}</td>
-                    <td className="px-4 py-3 text-sm text-muted-foreground">{product.category}</td>
-                    <td className="px-4 py-3 text-sm text-muted-foreground">{product.rarity}</td>
-                    <td className="px-4 py-3 text-sm">{product.stock}</td>
-                    <td className="px-4 py-3 text-sm">${Number(product.price_ars).toLocaleString()}</td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button variant="outline" size="sm" asChild>
-                          <Link href={`/admin/products/${product.id}/edit`}>{B.edit}</Link>
-                        </Button>
-                        <DeleteProductButton productId={product.id} />
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <ProductsTable products={productsData} />
 
           <Pagination
             currentPage={currentPage}

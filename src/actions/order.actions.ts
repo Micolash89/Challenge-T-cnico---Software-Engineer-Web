@@ -3,9 +3,8 @@
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { preferenceClient } from '@/lib/mercadopago';
-import { createOrder } from '@/services/order.service';
+import { createOrder, getOrder } from '@/services/order.service';
 import { createOrderSchema } from '@/lib/validations/order.schema';
-import { WHATSAPP } from '@/constants/whatsapp.constants';
 
 export interface OrderActionResult {
   error?: string;
@@ -18,12 +17,24 @@ export interface UpdateOrderResult {
   success?: boolean;
 }
 
+export interface ReservationData {
+  error?: string;
+  orderId?: string;
+  items?: Array<{
+    name: string;
+    rarity: string;
+    quantity: number;
+    price_ars: number;
+  }>;
+  total?: number;
+}
+
 async function checkAdminAuth(): Promise<UpdateOrderResult | null> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user || !['admin', 'super_admin'].includes(user.user_metadata?.role)) {
-    return { error: 'Unauthorized' };
+    return { error: 'No autorizado' };
   }
 
   return null;
@@ -38,7 +49,6 @@ export async function updateOrderStatusAction(
 
   const supabase = await createClient();
 
-  // Get current order
   const { data: order, error: fetchError } = await supabase
     .from('orders')
     .select('status')
@@ -46,15 +56,14 @@ export async function updateOrderStatusAction(
     .single();
 
   if (fetchError || !order) {
-    return { error: 'Order not found' };
+    return { error: 'Pedido no encontrado' };
   }
 
   if (order.status !== 'reservado') {
-    return { error: 'Only reservado orders can be updated' };
+    return { error: 'Solo pedidos en estado reservado pueden actualizarse' };
   }
 
   if (newStatus === 'pagado') {
-    // Decrement stock inside a transaction via RPC or sequential updates
     const { data: items, error: itemsError } = await supabase
       .from('order_items')
       .select('product_id, quantity')
@@ -64,7 +73,6 @@ export async function updateOrderStatusAction(
       return { error: itemsError.message };
     }
 
-    // Update stock for each item
     for (const item of items ?? []) {
       const { error: stockError } = await supabase.rpc('decrement_stock', {
         p_product_id: item.product_id,
@@ -72,7 +80,7 @@ export async function updateOrderStatusAction(
       });
 
       if (stockError) {
-        return { error: `Stock update failed: ${stockError.message}` };
+        return { error: `Error al actualizar stock: ${stockError.message}` };
       }
     }
   }
@@ -97,7 +105,8 @@ export async function createOrderAction(
 ): Promise<OrderActionResult> {
   const paymentMethod = formData.get('paymentMethod') as
     | 'mercadopago'
-    | 'whatsapp_efectivo';
+    | 'whatsapp_efectivo'
+    | '';
   const itemsRaw = formData.get('items') as string;
   const totalRaw = formData.get('total') as string;
 
@@ -127,7 +136,10 @@ export async function createOrderAction(
     return { error: firstError };
   }
 
-  // Get current user (optional — orders can be anonymous for WhatsApp)
+  if (!paymentMethod) {
+    return { error: 'Seleccioná un método de pago' };
+  }
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const userId = user?.id ?? null;
@@ -147,37 +159,26 @@ export async function createOrderAction(
   });
 
   if (paymentMethod === 'whatsapp_efectivo') {
-    const message = WHATSAPP.TEMPLATE({
-      id: order.id.slice(0, 8),
-      items: parsed.data.items.map((item) => ({
-        name: item.name,
-        rarity: item.rarity,
-        quantity: item.quantity,
-        price_ars: item.price_ars,
-      })),
-      total: parsed.data.total,
-    });
-
-    const phone = WHATSAPP.NUMBER;
-    const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-
     return {
       orderId: order.id,
-      redirectUrl: whatsappUrl,
+      redirectUrl: `/checkout/reservation?order=${order.id}`,
     };
   }
 
-  // Mercado Pago
   try {
     const mpPreference = await preferenceClient.create({
       body: {
-        items: parsed.data.items.map((item) => ({
-          id: item.id,
-          title: `${item.name} — ${item.rarity}`,
-          unit_price: item.price_ars,
-          quantity: item.quantity,
-          currency_id: 'ARS',
-        })),
+        items: parsed.data.items.map((item) => {
+          const rawPrice = item.price_ars;
+          const unitPrice = rawPrice > 1 ? rawPrice : rawPrice * 1000;
+          return {
+            id: item.id,
+            title: `${item.name} — ${item.rarity}`,
+            unit_price: unitPrice,
+            quantity: item.quantity,
+            currency_id: 'ARS',
+          };
+        }),
         external_reference: order.id,
         back_urls: {
           success: `${process.env.NEXT_PUBLIC_URL}/checkout/success?order_id=${order.id}`,
@@ -197,4 +198,22 @@ export async function createOrderAction(
     console.error('MP preference error:', err);
     return { error: 'Error al crear la preferencia de pago' };
   }
+}
+
+export async function getOrderForReservationAction(
+  orderId: string,
+): Promise<ReservationData> {
+  const order = await getOrder(orderId);
+  if (!order) return { error: 'Pedido no encontrado' };
+
+  return {
+    orderId: order.id,
+    items: order.items.map((item) => ({
+      name: item.productName,
+      rarity: item.productRarity,
+      quantity: item.quantity,
+      price_ars: Number(item.priceArsAtPurchase),
+    })),
+    total: Number(order.totalArs),
+  };
 }

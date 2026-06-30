@@ -11,7 +11,10 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
+  getProductsByLine,
+  getProductSorts,
 } from '@/services/product.service';
+import type { GetProductsParams } from '@/services/product.service';
 
 export interface ActionResult {
   error?: string;
@@ -86,4 +89,12 @@ export async function deleteProductAction(
 
   revalidatePath('/admin/products');
   return { success: true };
+}
+
+export async function getProductsByLineAction(params: GetProductsParams) {
+  return getProductsByLine(params);
+}
+
+export async function getProductSortsAction(productLine: string) {
+  return getProductSorts(productLine);
 }

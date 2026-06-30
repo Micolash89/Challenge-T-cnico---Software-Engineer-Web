@@ -1,4 +1,4 @@
-import { eq, and, gt, asc, count } from 'drizzle-orm';
+import { eq, and, gt, asc, count, ilike } from 'drizzle-orm';
 import { db as getDb } from '@/db';
 import { products } from '@/db/schema';
 import type { Product, DataProduct, DataSorts } from '@/types/product.types';
@@ -9,6 +9,7 @@ export interface GetProductsParams {
   onlyInStock?: boolean;
   category?: string;
   rarity?: string;
+  search?: string;
   page?: number;
   pageSize?: number;
 }
@@ -21,12 +22,13 @@ export async function getProductsByLine(
     onlyInStock = false,
     category,
     rarity,
+    search,
     page = 1,
     pageSize = 20,
   } = params;
 
   const conditions = [
-    eq(products.productLineName, productLine),
+    eq(products.product_line_name, productLine),
     eq(products.active, true),
   ];
 
@@ -40,6 +42,10 @@ export async function getProductsByLine(
 
   if (rarity) {
     conditions.push(eq(products.rarity, rarity));
+  }
+
+  if (search) {
+    conditions.push(ilike(products.name, `%${search}%`));
   }
 
   const where = and(...conditions);
@@ -69,18 +75,17 @@ export async function getProductsByLine(
   };
 }
 
-export async function getProductBySlug(
+export async function getProductById(
   productLine: string,
-  slug: string,
+  id: string,
 ): Promise<Product | null> {
   const [product] = await getDb()
     .select()
     .from(products)
     .where(
       and(
-        eq(products.productLineName, productLine),
-        eq(products.slug, slug),
-        eq(products.active, true),
+        eq(products.product_line_name, productLine),
+        eq(products.id, id),
       ),
     )
     .limit(1);
@@ -89,7 +94,7 @@ export async function getProductBySlug(
 }
 
 export async function getProductSorts(
-  productLine: string,
+  product_line_name: string,
 ): Promise<DataSorts> {
   const allProducts = await getDb()
     .select({
@@ -99,7 +104,7 @@ export async function getProductSorts(
     .from(products)
     .where(
       and(
-        eq(products.productLineName, productLine),
+        eq(products.product_line_name, product_line_name),
         eq(products.active, true),
       ),
     );
@@ -140,7 +145,7 @@ export async function createProduct(data: CreateProductInput): Promise<Product> 
       rarity: data.rarity,
       rarityCode: data.rarityCode,
       category: data.category,
-      productLineName: data.productLineName,
+      product_line_name: data.product_line_name,
       productId: data.productId,
       stock: data.stock,
       active: data.active,
@@ -163,7 +168,7 @@ export async function updateProduct(id: string, data: UpdateProductInput): Promi
   if (data.rarity !== undefined) updateData.rarity = data.rarity;
   if (data.rarityCode !== undefined) updateData.rarityCode = data.rarityCode;
   if (data.category !== undefined) updateData.category = data.category;
-  if (data.productLineName !== undefined) updateData.productLineName = data.productLineName;
+  if (data.product_line_name !== undefined) updateData.product_line_name = data.product_line_name;
   if (data.productId !== undefined) updateData.productId = data.productId;
   if (data.stock !== undefined) updateData.stock = data.stock;
   if (data.active !== undefined) updateData.active = data.active;

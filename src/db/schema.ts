@@ -33,7 +33,7 @@ export const products = pgTable('products', {
   rarity: text('rarity').notNull(),
   rarityCode: text('rarity_code').notNull(),
   category: text('category').notNull(),
-  productLineName: text('product_line_name').notNull(),
+  product_line_name: text('product_line_name').notNull(),
   productId: integer('product_id').notNull(),
   stock: integer('stock').notNull().default(0),
   active: boolean('active').notNull().default(true),
