@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
 import {
@@ -12,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatARS } from "@/lib/format";
 import { ADMIN_I18N } from "@/constants/admin-i18n.constants";
 import {
   containerVariantsCascade,
@@ -22,12 +22,6 @@ import { OrderModal } from "./OrderModal";
 
 const T = ADMIN_I18N.tables;
 const S = ADMIN_I18N.statuses;
-
-const STATUS_VARIANTS: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-  reservado: "secondary",
-  pagado: "default",
-  cancelado: "destructive",
-};
 
 interface OrdersTableProps {
   orders: Record<string, unknown>[];
@@ -52,13 +46,21 @@ export function OrdersTable({ orders }: OrdersTableProps) {
           >
             <div className="mb-2 flex items-center justify-between">
               <p className="text-sm font-medium">Pedido #{(order.id as string).slice(0, 8)}</p>
-              <Badge variant={STATUS_VARIANTS[order.status as string] ?? "outline"}>
+              <span
+                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold text-white ${
+                  order.status === "pagado"
+                    ? "bg-[hsl(142,76%,36%)]"
+                    : order.status === "cancelado"
+                      ? "bg-[hsl(0,84%,60%)]"
+                      : "bg-[hsl(38,92%,50%)]"
+                }`}
+              >
                 {S[order.status as keyof typeof S] ?? String(order.status)}
-              </Badge>
+              </span>
             </div>
             <div className="mb-2 flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Total:</span>
-              <span className="font-medium">${Number(order.total_ars).toLocaleString()}</span>
+              <span className="font-medium">${formatARS(order.total_ars)}</span>
             </div>
             <div className="mb-2 flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Método:</span>
@@ -100,11 +102,19 @@ export function OrdersTable({ orders }: OrdersTableProps) {
                 <TableCell className="font-medium">
                   Pedido #{(order.id as string).slice(0, 8)}
                 </TableCell>
-                <TableCell>${Number(order.total_ars).toLocaleString()}</TableCell>
+                <TableCell>${formatARS(order.total_ars)}</TableCell>
                 <TableCell>
-                  <Badge variant={STATUS_VARIANTS[order.status as string] ?? "outline"}>
+                  <span
+                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold text-white ${
+                      order.status === "pagado"
+                        ? "bg-[hsl(142,76%,36%)]"
+                        : order.status === "cancelado"
+                          ? "bg-[hsl(0,84%,60%)]"
+                          : "bg-[hsl(38,92%,50%)]"
+                    }`}
+                  >
                     {S[order.status as keyof typeof S] ?? String(order.status)}
-                  </Badge>
+                  </span>
                 </TableCell>
                 <TableCell className="text-muted-foreground">
                   {String(order.payment_method ?? order.paymentMethod)}
@@ -118,7 +128,7 @@ export function OrdersTable({ orders }: OrdersTableProps) {
                     size="icon"
                     onClick={() => setSelectedOrder(order)}
                   >
-                    <Eye className="h-4 w-4" />
+                    <Eye className="size-5" />
                   </Button>
                 </TableCell>
               </TableRow>

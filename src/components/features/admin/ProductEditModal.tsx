@@ -23,7 +23,7 @@ interface ProductRow {
   category: string;
   rarity: string;
   stock: number;
-  price: number;
+  price_ars: number;
 }
 
 interface ProductEditModalProps {
@@ -36,7 +36,7 @@ export function ProductEditModal({
   onClose,
 }: ProductEditModalProps) {
   const [isPending, startTransition] = useTransition();
-  const [price, setPrice] = useState(String(product.price));
+  const [priceArs, setPriceArs] = useState(String(product.price_ars));
   const [stock, setStock] = useState(String(product.stock));
   const [img, setImg] = useState('');
   const [active, setActive] = useState(true);
@@ -45,8 +45,7 @@ export function ProductEditModal({
   const handleSave = () => {
     startTransition(async () => {
       const formData = new FormData();
-      formData.set('price_ars', String(0));
-      formData.set('price', price);
+      formData.set('priceArs', priceArs);
       formData.set('stock', stock);
       formData.set('img', img);
       formData.set('name', product.name);
@@ -106,12 +105,12 @@ export function ProductEditModal({
             {/* Editable fields */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="price_ars">Precio ARS</Label>
+                <Label htmlFor="priceArs">Precio ARS</Label>
                 <Input
-                  id="price_ars"
+                  id="priceArs"
                   type="number"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
+                  value={priceArs}
+                  onChange={(e) => setPriceArs(e.target.value)}
                 />
               </div>
               <div className="space-y-2">
@@ -173,13 +172,13 @@ export function ProductEditModal({
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="h-6 w-6"
+                    className="size-6"
                     onClick={() => setShowPreview(!showPreview)}
                   >
                     {showPreview ? (
-                      <EyeOff className="h-4 w-4" />
+                      <EyeOff className="size-5" />
                     ) : (
-                      <Eye className="h-4 w-4" />
+                      <Eye className="size-5" />
                     )}
                   </Button>
                 </div>
@@ -216,7 +215,7 @@ export function ProductEditModal({
           >
             {isPending ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="mr-2 size-5 animate-spin" />
                 Guardando...
               </>
             ) : (

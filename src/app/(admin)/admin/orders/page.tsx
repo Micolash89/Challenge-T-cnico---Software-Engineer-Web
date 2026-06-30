@@ -1,4 +1,5 @@
 import { Breadcrumbs } from '@/components/features/admin/Breadcrumbs';
+import { Button } from '@/components/ui/button';
 import { Pagination } from '@/components/features/admin/Pagination';
 import { OrdersTable } from '@/components/features/admin/OrdersTable';
 import { ADMIN_I18N } from '@/constants/admin-i18n.constants';
@@ -63,12 +64,7 @@ export default async function OrdersPage({ searchParams }: PageProps) {
           <option value="pagado">{ADMIN_I18N.statuses.pagado}</option>
           <option value="cancelado">{ADMIN_I18N.statuses.cancelado}</option>
         </select>
-        <button
-          type="submit"
-          className="rounded-lg bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary/90"
-        >
-          {ADMIN_I18N.buttons.filter}
-        </button>
+        <Button type="submit">{ADMIN_I18N.buttons.filter}</Button>
       </form>
 
       {orders.length === 0 ? (

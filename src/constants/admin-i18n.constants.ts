@@ -34,6 +34,7 @@ export const ADMIN_I18N = {
     save: 'Guardar',
     cancel: 'Cancelar',
     delete: 'Eliminar',
+    reactivate: 'Reactivar',
     edit: 'Editar',
     view: 'Ver',
     markPaid: 'Marcar como Pagado',

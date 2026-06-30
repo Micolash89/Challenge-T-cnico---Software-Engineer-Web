@@ -184,17 +184,20 @@ export async function updateProduct(id: string, data: UpdateProductInput): Promi
   return product as unknown as Product;
 }
 
-export async function deleteProduct(id: string): Promise<Product | null> {
-  const [existing] = await getDb()
-    .select({ id: products.id })
-    .from(products)
-    .where(eq(products.id, id))
-    .limit(1);
-
-  if (!existing) return null;
-
+export async function softDeleteProduct(id: string): Promise<Product | null> {
   const [product] = await getDb()
-    .delete(products)
+    .update(products)
+    .set({ active: false })
+    .where(eq(products.id, id))
+    .returning();
+
+  return (product as unknown as Product) ?? null;
+}
+
+export async function reactivateProduct(id: string): Promise<Product | null> {
+  const [product] = await getDb()
+    .update(products)
+    .set({ active: true })
     .where(eq(products.id, id))
     .returning();
 

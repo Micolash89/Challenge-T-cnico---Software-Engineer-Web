@@ -2,8 +2,9 @@
 
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { DeleteProductButton } from "./DeleteProductButton";
+import { ProductStatusButton } from "./ProductStatusButton";
 import { ProductEditModal } from "./ProductEditModal";
+import { formatARS } from "@/lib/format";
 import { ADMIN_I18N } from "@/constants/admin-i18n.constants";
 import {
   Table,
@@ -17,10 +18,12 @@ import {
   containerVariantsCascade,
   variantsParams,
 } from "@/lib/animation-variants";
+import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 
 const T = ADMIN_I18N.tables;
 const B = ADMIN_I18N.buttons;
+const S = ADMIN_I18N.statuses;
 
 interface ProductRow {
   id: string;
@@ -28,7 +31,8 @@ interface ProductRow {
   category: string;
   rarity: string;
   stock: number;
-  price: number;
+  price_ars: number;
+  active: boolean;
 }
 
 interface ProductsTableProps {
@@ -57,10 +61,16 @@ export function ProductsTable({ products }: ProductsTableProps) {
               <span>{product.category}</span>
               <span>·</span>
               <span>{product.rarity}</span>
+              <Badge
+                variant={product.active ? 'default' : 'secondary'}
+                className="ml-auto text-[10px]"
+              >
+                {product.active ? S.active : S.inactive}
+              </Badge>
             </div>
             <div className="mb-3 flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Stock: {product.stock}</span>
-              <span className="font-medium">${Number(product.price).toLocaleString()}</span>
+              <span className="font-medium">${formatARS(product.price_ars)}</span>
             </div>
             <div className="flex gap-2">
               <Button
@@ -71,7 +81,7 @@ export function ProductsTable({ products }: ProductsTableProps) {
               >
                 {B.edit}
               </Button>
-              <DeleteProductButton productId={product.id} />
+              <ProductStatusButton productId={product.id} active={product.active} />
             </div>
           </motion.div>
         ))}
@@ -87,6 +97,7 @@ export function ProductsTable({ products }: ProductsTableProps) {
               <TableHead>{T.rarity}</TableHead>
               <TableHead>{T.stock}</TableHead>
               <TableHead>{T.price}</TableHead>
+              <TableHead>{T.active}</TableHead>
               <TableHead className="text-right">{T.actions}</TableHead>
             </TableRow>
           </TableHeader>
@@ -97,7 +108,12 @@ export function ProductsTable({ products }: ProductsTableProps) {
                 <TableCell className="text-muted-foreground">{product.category}</TableCell>
                 <TableCell className="text-muted-foreground">{product.rarity}</TableCell>
                 <TableCell>{product.stock}</TableCell>
-                <TableCell>${Number(product.price ).toLocaleString()}</TableCell>
+                <TableCell>${formatARS(product.price_ars)}</TableCell>
+                <TableCell>
+                  <Badge variant={product.active ? 'default' : 'secondary'}>
+                    {product.active ? S.active : S.inactive}
+                  </Badge>
+                </TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-2">
                     <Button
@@ -107,7 +123,7 @@ export function ProductsTable({ products }: ProductsTableProps) {
                     >
                       {B.edit}
                     </Button>
-                    <DeleteProductButton productId={product.id} />
+                    <ProductStatusButton productId={product.id} active={product.active} />
                   </div>
                 </TableCell>
               </TableRow>

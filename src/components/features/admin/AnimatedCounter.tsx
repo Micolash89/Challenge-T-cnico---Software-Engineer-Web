@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { formatARS } from '@/lib/format';
 
 interface AnimatedCounterProps {
   value: number;
@@ -33,7 +34,7 @@ export function AnimatedCounter({
       }
 
       setDisplayValue(
-        `${prefix}${Math.floor(currentValue).toLocaleString()}${suffix}`,
+        `${prefix}${formatARS(Math.floor(currentValue))}${suffix}`,
       );
     }, 1000 / 60);
 

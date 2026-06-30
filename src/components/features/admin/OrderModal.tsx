@@ -8,7 +8,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -20,6 +19,7 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
 import { CheckCircle, Clock, XCircle } from 'lucide-react';
+import { formatARS } from '@/lib/format';
 import { ADMIN_I18N } from '@/constants/admin-i18n.constants';
 import { updateOrderStatusAction } from '@/actions/order.actions';
 
@@ -30,27 +30,21 @@ interface OrderModalProps {
   onClose: () => void;
 }
 
-const STATUS_VARIANTS: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-  reservado: 'secondary',
-  pagado: 'default',
-  cancelado: 'destructive',
-};
-
 function getStatusIcon(status: string) {
   switch (status?.toLowerCase()) {
     case 'pagado':
     case 'paid':
-      return <CheckCircle className="h-4 w-4" />;
+      return <CheckCircle className="size-5" />;
     case 'reservado':
     case 'reserved':
     case 'pendiente':
     case 'pending':
-      return <Clock className="h-4 w-4" />;
+      return <Clock className="size-5" />;
     case 'cancelado':
     case 'canceled':
-      return <XCircle className="h-4 w-4" />;
+      return <XCircle className="size-5" />;
     default:
-      return <Clock className="h-4 w-4" />;
+      return <Clock className="size-5" />;
   }
 }
 
@@ -91,13 +85,18 @@ export function OrderModal({ order, onClose }: OrderModalProps) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             Pedido #{(order.id as string).slice(0, 8)}
-            <Badge
-              variant={STATUS_VARIANTS[currentStatus] ?? 'outline'}
-              className="flex items-center gap-1 capitalize"
+            <span
+              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize text-white ${
+                currentStatus === 'pagado'
+                  ? 'bg-[hsl(142,76%,36%)]'
+                  : currentStatus === 'cancelado'
+                    ? 'bg-[hsl(0,84%,60%)]'
+                    : 'bg-[hsl(38,92%,50%)]'
+              }`}
             >
               {getStatusIcon(currentStatus)}
               {S[currentStatus as keyof typeof S] ?? currentStatus}
-            </Badge>
+            </span>
           </DialogTitle>
           <DialogDescription>
             Detalles y gestión del pedido
@@ -111,13 +110,13 @@ export function OrderModal({ order, onClose }: OrderModalProps) {
               <div>
                 <p className="text-sm text-muted-foreground">Total ARS</p>
                 <p className="text-lg font-semibold">
-                  ${Number(order.total_ars).toLocaleString()}
+                  ${formatARS(order.total_ars)}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Total Pagado</p>
                 <p className="text-lg font-semibold">
-                  ${Number(order.total_paid ?? 0).toLocaleString()}
+                  ${formatARS(order.total_paid ?? 0)}
                 </p>
               </div>
               <div>
@@ -136,13 +135,13 @@ export function OrderModal({ order, onClose }: OrderModalProps) {
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <p className="text-muted-foreground">Creado:</p>
-                <p>{new Date(String(order.created_at ?? order.createdAt)).toLocaleString()}</p>
+                <p>{new Date(String(order.created_at ?? order.createdAt)).toLocaleString("es-AR")}</p>
               </div>
               <div>
                 <p className="text-muted-foreground">Modificado:</p>
                 <p>
                   {order.modified_at
-                    ? new Date(String(order.modified_at)).toLocaleString()
+                    ? new Date(String(order.modified_at)).toLocaleString("es-AR")
                     : '-'}
                 </p>
               </div>
@@ -166,7 +165,7 @@ export function OrderModal({ order, onClose }: OrderModalProps) {
                       </p>
                       <div className="mt-2 flex items-center justify-between text-sm">
                         <span>x{Number(item.quantity)}</span>
-                        <span>${Number(item.priceArsAtPurchase ?? item.price_ars).toLocaleString()}</span>
+                        <span>${formatARS(item.priceArsAtPurchase ?? item.price_ars)}</span>
                       </div>
                     </div>
                   ))}

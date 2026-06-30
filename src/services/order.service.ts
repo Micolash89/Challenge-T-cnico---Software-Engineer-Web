@@ -45,6 +45,11 @@ export async function createOrder(params: CreateOrderParams) {
   return order;
 }
 
+export async function deleteOrder(orderId: string) {
+  const db = getDb();
+  await db.delete(orders).where(eq(orders.id, orderId));
+}
+
 export async function getOrder(orderId: string) {
   const db = getDb();
   const [order] = await db
