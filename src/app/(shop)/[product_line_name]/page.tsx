@@ -18,7 +18,7 @@ function CatalogContent() {
   const [sorts, setSorts] = useState<DataSorts | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadingSorts, setLoadingSorts] = useState(true);
-  const stock = searchParams.get("stock") === "true";
+  const stock = searchParams.get("stock") !== "false";
   const category = searchParams.get("category") ?? undefined;
   const rarity = searchParams.get("rarity") ?? undefined;
   const search = searchParams.get("search") ?? undefined;

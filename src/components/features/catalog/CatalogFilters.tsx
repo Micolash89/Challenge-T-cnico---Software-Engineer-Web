@@ -25,7 +25,7 @@ export function CatalogFilters({ categories, rarities }: CatalogFiltersProps) {
 
   const activeCategory = searchParams.get('category') ?? '';
   const activeRarity = searchParams.get('rarity') ?? '';
-  const activeStock = searchParams.get('stock') === 'true';
+  const activeStock = searchParams.get('stock') !== 'false';
   const activeSearch = searchParams.get('search') ?? '';
 
   const updateParams = useCallback(
@@ -68,7 +68,7 @@ export function CatalogFilters({ categories, rarities }: CatalogFiltersProps) {
       <Button
         variant={activeStock ? "default" : "outline"}
         size="sm"
-        onClick={() => updateParams({ stock: activeStock ? '' : 'true' })}
+        onClick={() => updateParams({ stock: activeStock ? 'false' : '' })}
         className="h-9 gap-1.5"
       >
         {activeStock ? (

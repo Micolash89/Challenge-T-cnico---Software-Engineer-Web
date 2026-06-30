@@ -1,8 +1,12 @@
+import Link from "next/link";
 import { HeroCarousel } from '@/components/features/home/HeroCarousel';
 import { TopProductsGrid } from '@/components/features/home/TopProductsGrid';
 import { FadeInSection } from '@/components/features/layout/FadeInSection';
+import { getTopProducts } from '@/services/product.service';
 
-export default function HomePage() {
+export default async function HomePage() {
+  const products = await getTopProducts(4);
+
   return (
     <div className="flex flex-col">
       <HeroCarousel images={["/images/justice-hunters.webp", "/images/Yu-Gi-Oh_Banner.webp", "/images/digimon-card-banner.jpg"]} />
@@ -15,7 +19,15 @@ export default function HomePage() {
             Las cartas y boxes más buscados de Yu-Gi-Oh!
           </p>
           <div className="mt-10">
-            <TopProductsGrid />
+            <TopProductsGrid products={products} />
+          </div>
+          <div className="mt-12 text-center">
+            <Link
+              href="/yugioh"
+              className="inline-flex items-center gap-2 rounded-full bg-ink px-8 py-3 text-body-sm font-medium text-snow transition-opacity hover:opacity-90"
+            >
+              Ver más productos
+            </Link>
           </div>
         </section>
       </FadeInSection>
