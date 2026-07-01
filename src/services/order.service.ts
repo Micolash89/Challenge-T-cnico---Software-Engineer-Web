@@ -68,6 +68,51 @@ export async function getOrder(orderId: string) {
   return { ...order, items };
 }
 
+export async function adminMarkAsPaid(orderId: string) {
+  const db = getDb();
+
+  await db.transaction(async (tx) => {
+    const [order] = await tx
+      .select()
+      .from(orders)
+      .where(eq(orders.id, orderId))
+      .limit(1);
+
+    if (!order) throw new Error('Pedido no encontrado');
+    if (order.status !== 'reservado') {
+      throw new Error('Solo pedidos reservados pueden marcarse como pagados');
+    }
+
+    const items = await tx
+      .select()
+      .from(orderItems)
+      .where(eq(orderItems.orderId, orderId));
+
+    for (const item of items) {
+      const result = await tx
+        .update(products)
+        .set({ stock: sql`${products.stock} - ${item.quantity}` })
+        .where(
+          and(
+            eq(products.id, item.productId),
+            sql`${products.stock} >= ${item.quantity}`,
+          ),
+        );
+
+      if (result.count === 0) {
+        throw new Error(
+          `Stock insuficiente para ${item.productName}`,
+        );
+      }
+    }
+
+    await tx
+      .update(orders)
+      .set({ status: 'pagado' })
+      .where(eq(orders.id, orderId));
+  });
+}
+
 export async function updateOrderToPaid(
   orderId: string,
   mpPaymentId: string,

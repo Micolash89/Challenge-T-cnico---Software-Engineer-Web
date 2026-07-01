@@ -51,7 +51,7 @@ export function ConfirmationModal({
             variant={variant === 'destructive' ? 'destructive' : 'default'}
             onClick={onConfirm}
             disabled={loading}
-            className="px-5 py-3 rounded-lg"
+            className="px-5 py-3 rounded-lg "
           >
             {loading ? 'Procesando...' : confirmLabel}
           </Button>

@@ -30,7 +30,6 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <div
-      // href={productDetailRoute(product.product_line_name, product.id)}
       className="group block"
       title={product.name}
     >

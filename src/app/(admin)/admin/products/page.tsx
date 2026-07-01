@@ -52,6 +52,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
   }
 
   const productsData = 'data' in result ? result.data : [];
+  const total = 'total' in result ? result.total : 0;
   const totalPages = 'totalPages' in result ? result.totalPages : 1;
 
   return (
@@ -63,7 +64,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
         ]}
       />
 
-      <ProductsHeader />
+      <ProductsHeader total={total} />
 
       <ProductsFilters categories={categories} rarities={rarities} />
 
