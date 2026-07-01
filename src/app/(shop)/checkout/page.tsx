@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Loader2, Banknote, CircleCheck } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import { initMercadoPago, Wallet } from "@mercadopago/sdk-react";
 import { useCartStore } from "@/hooks/useCartStore";
 import { createOrderAction } from "@/actions/order.actions";
 import { ROUTES } from "@/constants/routes.constants";
@@ -20,20 +21,23 @@ const itemVariant = {
   visible: { opacity: 1, y: 0 },
 };
 
+const PUBLIC_KEY = process.env.NEXT_PUBLIC_MP_PUBLIC_KEY ?? "";
+
 export default function CheckoutPage() {
   const { items, clearCart } = useCartStore();
   const [paymentMethod, setPaymentMethod] = useState<
     "mercadopago" | "whatsapp_efectivo" | null
   >(null);
   const [state, formAction, pending] = useActionState(createOrderAction, null);
+  const mpInitRef = useRef(false);
   const toastShownRef = useRef(false);
 
   useEffect(() => {
-    if (state?.redirectUrl) {
+    if (state?.redirectUrl && state.paymentMethod === "whatsapp_efectivo") {
       clearCart();
       window.location.href = state.redirectUrl;
     }
-  }, [state?.redirectUrl, clearCart]);
+  }, [state?.redirectUrl, state?.paymentMethod, clearCart]);
 
   useEffect(() => {
     if (state?.error && !toastShownRef.current) {
@@ -44,6 +48,13 @@ export default function CheckoutPage() {
       toastShownRef.current = false;
     }
   }, [state?.error]);
+
+  useEffect(() => {
+    if (state?.preferenceId && !mpInitRef.current) {
+      initMercadoPago(PUBLIC_KEY);
+      mpInitRef.current = true;
+    }
+  }, [state?.preferenceId]);
 
   if (items.length === 0 && !pending) {
     return <EmptyCart url={ROUTES.HOME} />;
@@ -75,132 +86,140 @@ export default function CheckoutPage() {
             </h1>
           </div>
 
-          <form
-            action={formAction}
-            onSubmit={(e) => {
-              if (!paymentMethod) {
-                e.preventDefault();
-                toast.error("Seleccioná un método de pago");
-              }
-            }}
-            className="md:sticky md:top-21"
-          >
-            <input type="hidden" name="paymentMethod" value={paymentMethod ?? ""} />
-            <input
-              type="hidden"
-              name="items"
-              value={JSON.stringify(
-                items.map((item) => ({
-                  id: item.id,
-                  quantity: Number(item.quantity) || 1,
-                  price_ars: Number(item.price_ars) || Number(item.price),
-                  name: item.name,
-                  img: item.img,
-                  rarity: item.rarity,
-                })),
-              )}
-            />
-            <input type="hidden" name="total" value={Number(total)} />
-
-            <h2 className="mb-4 font-heading text-subheading font-semibold text-ink">
-              Método de pago
-            </h2>
-
-            <motion.div
-              variants={containerVariantsCascade}
-              initial="hidden"
-              animate="visible"
-              className="flex flex-col gap-3"
+          {state?.preferenceId && paymentMethod === "mercadopago" ? (
+            <div className="max-w-sm">
+              <p className="mb-4 text-body-sm text-graphite">
+                Hacé clic en el botón de Mercado Pago para ir al pago
+              </p>
+              <Wallet initialization={{ preferenceId: state.preferenceId }} />
+            </div>
+          ) : (
+            <form
+              action={formAction}
+              onSubmit={(e) => {
+                if (!paymentMethod) {
+                  e.preventDefault();
+                  toast.error("Seleccioná un método de pago");
+                }
+              }}
+              className="md:sticky md:top-21"
             >
-              <motion.div variants={itemVariant}>
-                <label
-                  className={`flex cursor-pointer items-center gap-4 rounded-lg border py-4 px-5 transition-colors justify-between ${
-                    paymentMethod === "mercadopago"
-                      ? "border-ink/30 bg-ink/5"
-                      : "border-silver-mist bg-snow hover:border-ink/20"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="pm"
-                    value="mercadopago"
-                    checked={paymentMethod === "mercadopago"}
-                    onChange={() => setPaymentMethod("mercadopago")}
-                    className="size-4 accent-ink hidden"
-                  />
-                  <div className="flex flex-col">
-                    <span className="text-body-sm font-medium text-ink">
-                      Mercado Pago
-                    </span>
-                    <span className="text-caption text-graphite">
-                      Tarjeta de crédito, débito o efectivo
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Image
-                      src="/images/mercadopago-seeklogo.png"
-                      alt="Mercado Pago"
-                      width={40}
-                      height={40}
-                      className="object-contain h-auto w-auto"
+              <input type="hidden" name="paymentMethod" value={paymentMethod ?? ""} />
+              <input
+                type="hidden"
+                name="items"
+                value={JSON.stringify(
+                  items.map((item) => ({
+                    id: item.id,
+                    quantity: Number(item.quantity) || 1,
+                    price_ars: Number(item.price_ars) || Number(item.price),
+                    name: item.name,
+                    img: item.img,
+                    rarity: item.rarity,
+                  })),
+                )}
+              />
+              <input type="hidden" name="total" value={Number(total)} />
+
+              <h2 className="mb-4 font-heading text-subheading font-semibold text-ink">
+                Método de pago
+              </h2>
+
+              <motion.div
+                variants={containerVariantsCascade}
+                initial="hidden"
+                animate="visible"
+                className="flex flex-col gap-3"
+              >
+                <motion.div variants={itemVariant}>
+                  <label
+                    className={`flex cursor-pointer items-center gap-4 rounded-lg border py-4 px-5 transition-colors justify-between ${
+                      paymentMethod === "mercadopago"
+                        ? "border-ink/30 bg-ink/5"
+                        : "border-silver-mist bg-snow hover:border-ink/20"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="pm"
+                      value="mercadopago"
+                      checked={paymentMethod === "mercadopago"}
+                      onChange={() => setPaymentMethod("mercadopago")}
+                      className="size-4 accent-ink hidden"
                     />
-                  </div>
-                </label>
+                    <div className="flex flex-col">
+                      <span className="text-body-sm font-medium text-ink">
+                        Mercado Pago
+                      </span>
+                      <span className="text-caption text-graphite">
+                        Tarjeta de crédito, débito o efectivo
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Image
+                        src="/images/mercadopago-seeklogo.png"
+                        alt="Mercado Pago"
+                        width={40}
+                        height={40}
+                        className="object-contain h-auto w-auto"
+                      />
+                    </div>
+                  </label>
+                </motion.div>
+
+                <motion.div variants={itemVariant}>
+                  <label
+                    className={`flex cursor-pointer items-center gap-4 rounded-lg border py-4 px-5 transition-colors justify-between ${
+                      paymentMethod === "whatsapp_efectivo"
+                        ? "border-ink/30 bg-ink/5"
+                        : "border-silver-mist bg-snow hover:border-ink/20"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="pm"
+                      value="whatsapp_efectivo"
+                      checked={paymentMethod === "whatsapp_efectivo"}
+                      onChange={() => setPaymentMethod("whatsapp_efectivo")}
+                      className="size-4 accent-ink hidden"
+                    />
+                    <div className="flex flex-col">
+                      <span className="text-body-sm font-medium text-ink capitalize">
+                        Efectivo / deposito bancario
+                      </span>
+                      <span className="text-caption text-graphite">
+                        Te contactas por WhatsApp para coordinar el pago/seña y
+                        retiro del producto
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Image
+                        src="/images/icons8-whatsapp-144.png"
+                        alt="WhatsApp"
+                        width={30}
+                        height={30}
+                        className="object-contain h-auto w-auto"
+                      />
+                    </div>
+                  </label>
+                </motion.div>
               </motion.div>
 
-              <motion.div variants={itemVariant}>
-                <label
-                  className={`flex cursor-pointer items-center gap-4 rounded-lg border py-4 px-5 transition-colors justify-between ${
-                    paymentMethod === "whatsapp_efectivo"
-                      ? "border-ink/30 bg-ink/5"
-                      : "border-silver-mist bg-snow hover:border-ink/20"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="pm"
-                    value="whatsapp_efectivo"
-                    checked={paymentMethod === "whatsapp_efectivo"}
-                    onChange={() => setPaymentMethod("whatsapp_efectivo")}
-                    className="size-4 accent-ink hidden"
-                  />
-                  <div className="flex flex-col">
-                    <span className="text-body-sm font-medium text-ink capitalize">
-                      Efectivo / deposito bancario
-                    </span>
-                    <span className="text-caption text-graphite">
-                      Te contactas por WhatsApp para coordinar el pago/seña y
-                      retiro del producto
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Image
-                      src="/images/icons8-whatsapp-144.png"
-                      alt="WhatsApp"
-                      width={30}
-                      height={30}
-                      className="object-contain h-auto w-auto"
-                    />
-                  </div>
-                </label>
-              </motion.div>
-            </motion.div>
-
-            <button
-              type="submit"
-              disabled={pending}
-              className="mt-8 flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 text-body font-medium text-snow transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer hover:bg-primary/80"
-            >
-              {pending && <Loader2 className="size-5 animate-spin" />}
-              {pending
-                ? "Procesando..."
-                : paymentMethod === "mercadopago"
-                ? "Ir a pagar"
-                : "Confirmar pedido"}
-              
-                {!pending && <CircleCheck className="size-5 " />}
-            </button>
-          </form>
+              <button
+                type="submit"
+                disabled={pending}
+                className="mt-8 flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 text-body font-medium text-snow transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer hover:bg-primary/80"
+              >
+                {pending && <Loader2 className="size-5 animate-spin" />}
+                {pending
+                  ? "Procesando..."
+                  : paymentMethod === "mercadopago"
+                  ? "Ir a pagar"
+                  : "Confirmar pedido"}
+                {!pending && <CircleCheck className="size-5" />}
+              </button>
+            </form>
+          )}
         </motion.div>
 
         <motion.div

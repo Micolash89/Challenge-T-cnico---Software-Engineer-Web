@@ -4,15 +4,16 @@ import { Button } from '@/components/ui/button';
 import { Breadcrumbs } from '@/components/features/admin/Breadcrumbs';
 import { Pagination } from '@/components/features/admin/Pagination';
 import { ProductsTable } from '@/components/features/admin/ProductsTable';
+import { ProductsFilters } from '@/components/features/admin/ProductsFilters';
+import { getAllProductsAction, getProductSortsAdminAction } from '@/actions/admin.actions';
 import { ADMIN_I18N } from '@/constants/admin-i18n.constants';
-import { getAllProductsAction } from '@/actions/admin.actions';
 
 export const metadata = {
   title: `Productos — Admin`,
 };
 
 interface PageProps {
-  searchParams: Promise<{ page?: string; category?: string; rarity?: string; stock?: string }>;
+  searchParams: Promise<{ page?: string; category?: string; rarity?: string; stock?: string; search?: string; active?: string }>;
 }
 
 const B = ADMIN_I18N.buttons;
@@ -23,6 +24,12 @@ export default async function ProductsPage({ searchParams }: PageProps) {
   const categoryFilter = sp.category ?? '';
   const rarityFilter = sp.rarity ?? '';
   const stockFilter = sp.stock ?? '';
+  const searchFilter = sp.search ?? '';
+  const activeFilter = sp.active ?? '';
+
+  const sortsResult = await getProductSortsAdminAction();
+  const categories = 'categories' in sortsResult ? sortsResult.categories : [];
+  const rarities = 'rarities' in sortsResult ? sortsResult.rarities : [];
 
   const result = await getAllProductsAction({
     page: currentPage,
@@ -30,6 +37,8 @@ export default async function ProductsPage({ searchParams }: PageProps) {
     category: categoryFilter || undefined,
     rarity: rarityFilter || undefined,
     stock: stockFilter || undefined,
+    search: searchFilter || undefined,
+    active: activeFilter || undefined,
   });
 
   if ('error' in result && result.error) {
@@ -63,43 +72,13 @@ export default async function ProductsPage({ searchParams }: PageProps) {
         <h1 className="text-2xl font-bold">{ADMIN_I18N.pageTitles.products}</h1>
         <Button asChild>
           <Link href="/admin/products/new">
-            <Plus className="mr-1 h-4 w-4" />
+            <Plus className="mr-1 size-5" />
             {B.newProduct}
           </Link>
         </Button>
       </div>
 
-      <form method="GET" action="/admin/products" className="flex flex-wrap gap-2">
-        <input
-          type="text"
-          name="category"
-          placeholder={ADMIN_I18N.filters.category}
-          defaultValue={categoryFilter}
-          className="rounded-lg border bg-background px-3 py-2 text-sm"
-        />
-        <input
-          type="text"
-          name="rarity"
-          placeholder={ADMIN_I18N.filters.rarity}
-          defaultValue={rarityFilter}
-          className="rounded-lg border bg-background px-3 py-2 text-sm"
-        />
-        <select
-          name="stock"
-          className="rounded-lg border bg-background px-3 py-2 text-sm"
-          defaultValue={stockFilter}
-        >
-          <option value="">{ADMIN_I18N.buttons.clear}</option>
-          <option value="true">{ADMIN_I18N.filters.inStock}</option>
-          <option value="false">{ADMIN_I18N.filters.outOfStock}</option>
-        </select>
-        <button
-          type="submit"
-          className="rounded-lg bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary/90"
-        >
-          {ADMIN_I18N.buttons.filter}
-        </button>
-      </form>
+      <ProductsFilters categories={categories} rarities={rarities} />
 
       {productsData.length === 0 ? (
         <p className="text-muted-foreground">{ADMIN_I18N.empty.noProducts}</p>

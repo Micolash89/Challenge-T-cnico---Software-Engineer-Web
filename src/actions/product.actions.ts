@@ -10,7 +10,8 @@ import {
 import {
   createProduct,
   updateProduct,
-  deleteProduct,
+  softDeleteProduct,
+  reactivateProduct,
   getProductsByLine,
   getProductSorts,
 } from '@/services/product.service';
@@ -75,16 +76,32 @@ export async function updateProductAction(
   redirect('/admin/products');
 }
 
-export async function deleteProductAction(
+export async function softDeleteProductAction(
   id: string,
 ): Promise<ActionResult> {
   const authError = await checkAdminAuth();
   if (authError) return authError;
 
-  const deleted = await deleteProduct(id);
+  const deleted = await softDeleteProduct(id);
 
   if (!deleted) {
-    return { success: false, error: 'Product not found' };
+    return { success: false, error: 'Producto no encontrado' };
+  }
+
+  revalidatePath('/admin/products');
+  return { success: true };
+}
+
+export async function reactivateProductAction(
+  id: string,
+): Promise<ActionResult> {
+  const authError = await checkAdminAuth();
+  if (authError) return authError;
+
+  const product = await reactivateProduct(id);
+
+  if (!product) {
+    return { success: false, error: 'Producto no encontrado' };
   }
 
   revalidatePath('/admin/products');

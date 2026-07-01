@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { ADMIN_I18N } from '@/constants/admin-i18n.constants';
+import { AnimatedCounter } from './AnimatedCounter';
 
 interface DashboardStatsProps {
   totalProducts: number;
@@ -21,7 +22,9 @@ export function DashboardStats({
         className="rounded-xl border bg-card p-6 transition-colors hover:bg-accent/50"
       >
         <p className="text-sm text-muted-foreground">{D.products}</p>
-        <p className="mt-2 text-3xl font-bold">{totalProducts}</p>
+        <p className="mt-2 text-3xl font-bold">
+          <AnimatedCounter value={totalProducts} />
+        </p>
       </Link>
 
       <Link
@@ -29,7 +32,9 @@ export function DashboardStats({
         className="rounded-xl border bg-card p-6 transition-colors hover:bg-accent/50"
       >
         <p className="text-sm text-muted-foreground">{D.orders}</p>
-        <p className="mt-2 text-3xl font-bold">{totalOrders}</p>
+        <p className="mt-2 text-3xl font-bold">
+          <AnimatedCounter value={totalOrders} />
+        </p>
       </Link>
 
       <Link
@@ -37,7 +42,9 @@ export function DashboardStats({
         className="rounded-xl border bg-card p-6 transition-colors hover:bg-accent/50"
       >
         <p className="text-sm text-muted-foreground">{D.revenue}</p>
-        <p className="mt-2 text-3xl font-bold">${totalRevenue}</p>
+        <p className="mt-2 text-3xl font-bold">
+          <AnimatedCounter value={totalRevenue} prefix="$" />
+        </p>
       </Link>
     </div>
   );

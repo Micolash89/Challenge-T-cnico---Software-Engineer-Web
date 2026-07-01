@@ -3,13 +3,15 @@
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { preferenceClient } from '@/lib/mercadopago';
-import { createOrder, getOrder } from '@/services/order.service';
+import { createOrder, deleteOrder, getOrder } from '@/services/order.service';
 import { createOrderSchema } from '@/lib/validations/order.schema';
 
 export interface OrderActionResult {
   error?: string;
   orderId?: string;
+  paymentMethod?: string;
   redirectUrl?: string;
+  preferenceId?: string;
 }
 
 export interface UpdateOrderResult {
@@ -144,6 +146,29 @@ export async function createOrderAction(
   const { data: { user } } = await supabase.auth.getUser();
   const userId = user?.id ?? null;
 
+  if (paymentMethod === 'whatsapp_efectivo') {
+    const order = await createOrder({
+      userId,
+      paymentMethod: parsed.data.paymentMethod,
+      totalArs: parsed.data.total,
+      items: parsed.data.items.map((item) => ({
+        productId: item.id,
+        quantity: item.quantity,
+        priceArs: item.price_ars,
+        name: item.name,
+        img: item.img,
+        rarity: item.rarity,
+      })),
+    });
+
+    return {
+      orderId: order.id,
+      paymentMethod: 'whatsapp_efectivo',
+      redirectUrl: `/checkout/reservation?order=${order.id}`,
+    };
+  }
+
+  // For MP: create order first, then MP preference with external_reference
   const order = await createOrder({
     userId,
     paymentMethod: parsed.data.paymentMethod,
@@ -157,13 +182,6 @@ export async function createOrderAction(
       rarity: item.rarity,
     })),
   });
-
-  if (paymentMethod === 'whatsapp_efectivo') {
-    return {
-      orderId: order.id,
-      redirectUrl: `/checkout/reservation?order=${order.id}`,
-    };
-  }
 
   try {
     const mpPreference = await preferenceClient.create({
@@ -181,7 +199,7 @@ export async function createOrderAction(
         }),
         external_reference: order.id,
         back_urls: {
-          success: `${process.env.NEXT_PUBLIC_URL}/checkout/success?order_id=${order.id}`,
+          success: `${process.env.NEXT_PUBLIC_URL}/checkout/success`,
           failure: `${process.env.NEXT_PUBLIC_URL}/checkout/failure`,
           pending: `${process.env.NEXT_PUBLIC_URL}/checkout/pending`,
         },
@@ -192,11 +210,14 @@ export async function createOrderAction(
 
     return {
       orderId: order.id,
+      paymentMethod: 'mercadopago',
+      preferenceId: mpPreference.id,
       redirectUrl: mpPreference.init_point,
     };
   } catch (err) {
     console.error('MP preference error:', err);
-    return { error: 'Error al crear la preferencia de pago' };
+    await deleteOrder(order.id);
+    return { error: 'Error al crear la preferencia de pago. Se canceló el pedido.' };
   }
 }
 

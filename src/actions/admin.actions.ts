@@ -218,12 +218,33 @@ export async function getDashboardMetricsAction(): Promise<{
 // Products listing
 // ---------------------------------------------------------------------------
 
+export async function getProductSortsAdminAction(): Promise<
+  | { categories: string[]; rarities: string[] }
+  | ActionResult
+> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('products')
+    .select('category, rarity');
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  const categories = [...new Set((data ?? []).map((p: { category: string }) => p.category))].sort();
+  const rarities = [...new Set((data ?? []).map((p: { rarity: string }) => p.rarity))].sort();
+
+  return { categories, rarities };
+}
+
 export async function getAllProductsAction(params: {
   page?: number;
   pageSize?: number;
   category?: string;
   rarity?: string;
   stock?: string;
+  search?: string;
+  active?: string;
 }): Promise<
   | {
       data: Array<{
@@ -265,6 +286,16 @@ export async function getAllProductsAction(params: {
 
   if (params.rarity) {
     query = query.eq('rarity', params.rarity);
+  }
+
+  if (params.search) {
+    query = query.ilike('name', `%${params.search}%`);
+  }
+
+  if (params.active === 'true') {
+    query = query.eq('active', true);
+  } else if (params.active === 'false') {
+    query = query.eq('active', false);
   }
 
   if (params.stock === 'true') {
