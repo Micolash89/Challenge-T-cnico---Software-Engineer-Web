@@ -79,11 +79,12 @@ export default function CheckoutPage() {
   const total = items.reduce((sum, item) => sum + item.cost, 0);
 
   return (
-    <div className="mx-auto w-full max-w-[1200px] px-5 py-10 relative">
+    <div className="mx-auto max-w-[1200px] px-5 py-10 relative">
       <motion.div
         variants={variantsNormalDownUp}
         initial="hidden"
         animate="visible"
+        className="w-fit"
       >
         <LinkShopButton url={ROUTES.CART} message="volver al carrito" />
       </motion.div>

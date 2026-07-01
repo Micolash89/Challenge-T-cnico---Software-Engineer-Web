@@ -48,7 +48,10 @@ export default function CartPage() {
       >
         <div className="flex items-center justify-between transition-colors">
           <div className="w-full">
+            <div className="w-fit">
             <LinkShopButton url={ROUTES.YUGIOH} message="Seguir comprando" />
+
+            </div>
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-2">
                 <h1 className="font-heading text-heading font-semibold text-ink flex items-center gap-2">
