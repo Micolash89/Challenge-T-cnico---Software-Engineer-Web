@@ -36,7 +36,8 @@ export async function signInAction(
     return { error: error.message };
   }
 
-  redirect(ROUTES.HOME);
+  const redirectTo = (formData.get('redirect') as string) || ROUTES.HOME;
+  redirect(redirectTo);
 }
 
 export async function signUpAction(

@@ -34,6 +34,13 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
+  // Protección de checkout
+  if (request.nextUrl.pathname.startsWith('/checkout') && !user) {
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('redirect', '/checkout');
+    return NextResponse.redirect(loginUrl);
+  }
+
   return supabaseResponse;
 }
 

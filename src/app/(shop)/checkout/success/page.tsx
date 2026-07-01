@@ -11,9 +11,9 @@ import { variantsNormalDownUp } from "@/lib/animation-variants";
 
 export default function CheckoutSuccessPage() {
   const searchParams = useSearchParams();
-  const externalReference = searchParams.get("external_reference");
+  const orderId = searchParams.get("external_reference");
   const [verified, setVerified] = useState(false);
-  const [checking, setChecking] = useState(!!externalReference);
+  const [checking, setChecking] = useState(!!orderId);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const stopPolling = useCallback(() => {
@@ -24,10 +24,11 @@ export default function CheckoutSuccessPage() {
   }, []);
 
   useEffect(() => {
-    if (!externalReference) return;
+    if (!orderId) return;
+    const ref = orderId;
 
     async function check() {
-      const result = await verifyPaymentAction(externalReference!);
+      const result = await verifyPaymentAction(ref);
       if (result.verified) {
         setVerified(true);
         setChecking(false);
@@ -39,7 +40,7 @@ export default function CheckoutSuccessPage() {
     pollRef.current = setInterval(check, 3000);
 
     return stopPolling;
-  }, [externalReference, stopPolling]);
+  }, [orderId, stopPolling]);
 
   return (
     <div className="mx-auto flex min-h-[60vh] w-full max-w-[1200px] flex-col items-center justify-center gap-4 px-5">
