@@ -17,7 +17,7 @@ export const createProductSchema = z.object({
   rarityCode: nonEmptyString('El código de rareza'),
   category: nonEmptyString('La categoría'),
   product_line_name: nonEmptyString('La línea de producto'),
-  productId: z.coerce.number().int('Debe ser un número entero').min(0, 'Debe ser un número positivo'),
+  productId: z.coerce.number().int('Debe ser un número entero').min(0, 'Debe ser un número positivo').catch(0),
   stock: z.coerce.number().int('Debe ser un número entero').min(0, 'El stock mínimo es 0'),
   active: checkboxBoolean('Estado inválido').default(true),
   featured: checkboxBoolean('Estado inválido').default(false),
