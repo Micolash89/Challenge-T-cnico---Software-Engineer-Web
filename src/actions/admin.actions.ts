@@ -251,10 +251,11 @@ export async function getAllProductsAction(params: {
         id: string;
         name: string;
         slug: string;
+        img: string;
+        price: string;
         category: string;
         rarity: string;
         stock: number;
-        price_ars: number;
         active: boolean;
         product_line_name: string;
       }>;
@@ -274,10 +275,10 @@ export async function getAllProductsAction(params: {
   let query = supabase
     .from('products')
     .select(
-      'id, name, slug, category, rarity, stock, price_ars, active, product_line_name',
+      'id, name, slug, img, price, category, rarity, stock, active, product_line_name',
       { count: 'exact' },
     )
-    .order('created_at', { ascending: false })
+    .order('name', { ascending: true })
     .range((page - 1) * pageSize, page * pageSize - 1);
 
   if (params.category) {

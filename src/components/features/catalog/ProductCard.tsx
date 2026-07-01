@@ -29,8 +29,8 @@ export function ProductCard({ product }: ProductCardProps) {
   const isLowStock = product.stock > 0 && product.stock <= 3;
 
   return (
-    <Link
-      href={productDetailRoute(product.product_line_name, product.id)}
+    <div
+      // href={productDetailRoute(product.product_line_name, product.id)}
       className="group block"
       title={product.name}
     >
@@ -92,6 +92,6 @@ export function ProductCard({ product }: ProductCardProps) {
           <AddCartButton product={product} />
         </CardContent>
       </Card>
-    </Link>
+    </div>
   );
 }

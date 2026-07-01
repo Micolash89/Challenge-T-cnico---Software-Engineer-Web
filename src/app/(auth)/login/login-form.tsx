@@ -43,7 +43,7 @@ export function LoginForm({ redirectTo = '/' }: { redirectTo?: string }) {
         />
       </div>
 
-      <Button type="submit" disabled={pending} className="mt-2 w-full h-10 rounded-lg">
+      <Button type="submit" disabled={pending} className="mt-2 w-full h-10 rounded-lg cursor-pointer">
         {pending ? (
           <>
             <Loader2 className="mr-2 size-5 animate-spin" />

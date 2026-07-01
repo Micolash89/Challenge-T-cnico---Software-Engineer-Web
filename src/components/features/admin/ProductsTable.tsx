@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ProductStatusButton } from "./ProductStatusButton";
 import { ProductEditModal } from "./ProductEditModal";
-import { formatARS } from "@/lib/format";
 import { ADMIN_I18N } from "@/constants/admin-i18n.constants";
 import {
   Table,
@@ -20,6 +19,7 @@ import {
 } from "@/lib/animation-variants";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
+import { PenLine } from "lucide-react";
 
 const T = ADMIN_I18N.tables;
 const B = ADMIN_I18N.buttons;
@@ -29,9 +29,10 @@ interface ProductRow {
   id: string;
   name: string;
   category: string;
+  img: string;
+  price: string;
   rarity: string;
   stock: number;
-  price_ars: number;
   active: boolean;
 }
 
@@ -62,15 +63,18 @@ export function ProductsTable({ products }: ProductsTableProps) {
               <span>·</span>
               <span>{product.rarity}</span>
               <Badge
-                variant={product.active ? 'default' : 'secondary'}
-                className="ml-auto text-[10px]"
+                variant="default"
+                className={`ml-auto text-[10px] border-0 ${
+                  product.active
+                    ? 'bg-green-500 text-white hover:bg-green-600'
+                    : 'bg-red-500 text-white hover:bg-red-600'
+                }`}
               >
                 {product.active ? S.active : S.inactive}
               </Badge>
             </div>
             <div className="mb-3 flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Stock: {product.stock}</span>
-              <span className="font-medium">${formatARS(product.price_ars)}</span>
             </div>
             <div className="flex gap-2">
               <Button
@@ -96,7 +100,6 @@ export function ProductsTable({ products }: ProductsTableProps) {
               <TableHead>{T.category}</TableHead>
               <TableHead>{T.rarity}</TableHead>
               <TableHead>{T.stock}</TableHead>
-              <TableHead>{T.price}</TableHead>
               <TableHead>{T.active}</TableHead>
               <TableHead className="text-right">{T.actions}</TableHead>
             </TableRow>
@@ -108,9 +111,15 @@ export function ProductsTable({ products }: ProductsTableProps) {
                 <TableCell className="text-muted-foreground">{product.category}</TableCell>
                 <TableCell className="text-muted-foreground">{product.rarity}</TableCell>
                 <TableCell>{product.stock}</TableCell>
-                <TableCell>${formatARS(product.price_ars)}</TableCell>
                 <TableCell>
-                  <Badge variant={product.active ? 'default' : 'secondary'}>
+                  <Badge
+                    variant="default"
+                    className={`border-0 ${
+                      product.active
+                        ? 'bg-green-500 text-white hover:bg-green-600'
+                        : 'bg-red-500 text-white hover:bg-red-600'
+                    }`}
+                  >
                     {product.active ? S.active : S.inactive}
                   </Badge>
                 </TableCell>
@@ -120,8 +129,13 @@ export function ProductsTable({ products }: ProductsTableProps) {
                       variant="outline"
                       size="sm"
                       onClick={() => setEditingProduct(product)}
+                      className="flex items-center gap-1 bg-white"
                     >
+                      <PenLine className="size-5" />
+                      <span>
+
                       {B.edit}
+                      </span>
                     </Button>
                     <ProductStatusButton productId={product.id} active={product.active} />
                   </div>

@@ -1,10 +1,8 @@
-import Link from 'next/link';
-import { Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Breadcrumbs } from '@/components/features/admin/Breadcrumbs';
 import { Pagination } from '@/components/features/admin/Pagination';
 import { ProductsTable } from '@/components/features/admin/ProductsTable';
 import { ProductsFilters } from '@/components/features/admin/ProductsFilters';
+import { ProductsHeader } from '@/components/features/admin/ProductsHeader';
 import { getAllProductsAction, getProductSortsAdminAction } from '@/actions/admin.actions';
 import { ADMIN_I18N } from '@/constants/admin-i18n.constants';
 
@@ -15,8 +13,6 @@ export const metadata = {
 interface PageProps {
   searchParams: Promise<{ page?: string; category?: string; rarity?: string; stock?: string; search?: string; active?: string }>;
 }
-
-const B = ADMIN_I18N.buttons;
 
 export default async function ProductsPage({ searchParams }: PageProps) {
   const sp = await searchParams;
@@ -56,7 +52,6 @@ export default async function ProductsPage({ searchParams }: PageProps) {
   }
 
   const productsData = 'data' in result ? result.data : [];
-  const total = 'total' in result ? result.total : 0;
   const totalPages = 'totalPages' in result ? result.totalPages : 1;
 
   return (
@@ -68,15 +63,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
         ]}
       />
 
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{ADMIN_I18N.pageTitles.products}</h1>
-        <Button asChild>
-          <Link href="/admin/products/new">
-            <Plus className="mr-1 size-5" />
-            {B.newProduct}
-          </Link>
-        </Button>
-      </div>
+      <ProductsHeader />
 
       <ProductsFilters categories={categories} rarities={rarities} />
 
@@ -92,9 +79,6 @@ export default async function ProductsPage({ searchParams }: PageProps) {
             basePath="/admin/products"
           />
 
-          <p className="text-sm text-muted-foreground">
-            {total} producto{total !== 1 ? 's' : ''} en total
-          </p>
         </>
       )}
     </div>

@@ -57,7 +57,7 @@ export function ProductsFilters({ categories, rarities }: ProductsFiltersProps) 
     <div className="flex flex-wrap items-end gap-3">
       {/* Search */}
       <div className="relative w-full sm:w-64">
-        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Search className="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" />
         <Input
           defaultValue={activeSearch}
           onChange={(e) => debouncedSearch(e.target.value)}
@@ -73,7 +73,7 @@ export function ProductsFilters({ categories, rarities }: ProductsFiltersProps) 
         onClick={() => updateParams({ stock: activeStock === 'true' ? '' : 'true' })}
         className="h-9 gap-1.5"
       >
-        <PackageCheck className="size-4" />
+        <PackageCheck className="size-5" />
         En stock
       </Button>
 
@@ -84,7 +84,7 @@ export function ProductsFilters({ categories, rarities }: ProductsFiltersProps) 
         onClick={() => updateParams({ active: activeFilter === 'false' ? '' : 'false' })}
         className="h-9 gap-1.5"
       >
-        <EyeOff className="size-4" />
+        <EyeOff className="size-5" />
         Inactivos
       </Button>
 
@@ -93,13 +93,13 @@ export function ProductsFilters({ categories, rarities }: ProductsFiltersProps) 
         value={activeCategory}
         onValueChange={(value) => updateParams({ category: value === 'all' ? '' : value })}
       >
-        <SelectTrigger className="h-9 min-w-[140px]">
+        <SelectTrigger className="min-h-[36px] min-w-[140px]">
           <SelectValue placeholder={ADMIN_I18N.filters.category} />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">
             <span className="flex items-center gap-2">
-              <Package className="size-4" />
+              <Package className="size-5" />
               Todas
             </span>
           </SelectItem>
@@ -116,13 +116,13 @@ export function ProductsFilters({ categories, rarities }: ProductsFiltersProps) 
         value={activeRarity}
         onValueChange={(value) => updateParams({ rarity: value === 'all' ? '' : value })}
       >
-        <SelectTrigger className="h-9 min-w-[140px]">
+        <SelectTrigger className="min-h-[36px] min-w-[140px] cursor-hover">
           <SelectValue placeholder={ADMIN_I18N.filters.rarity} />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">
             <span className="flex items-center gap-2">
-              <Sparkles className="size-4" />
+              <Sparkles className="size-5" />
               Todas
             </span>
           </SelectItem>

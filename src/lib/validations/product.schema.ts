@@ -1,41 +1,42 @@
 import { z } from 'zod';
 
+const nonEmptyString = (label: string) =>
+  z.string().min(1, `${label} es requerido`);
+
+/** Convert checkbox FormData value ("on"/undefined) to boolean */
+const checkboxBoolean = (msg: string) =>
+  z.preprocess((val) => val === 'on' || val === true || val === 'true', z.boolean({ message: msg }));
+
 export const createProductSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  slug: z.string().min(1, 'Slug is required'),
+  name: nonEmptyString('El nombre'),
+  slug: nonEmptyString('El slug'),
   type: z.enum(['card', 'box']).default('card'),
-  img: z.string().min(1, 'Image URL is required').url('Must be a valid URL'),
-  price: z.string().min(1, 'Price is required'),
-  priceArs: z.string().min(1, 'Price ARS must be at least 1'),
-  rarity: z.string().min(1, 'Rarity is required'),
-  rarityCode: z.string().min(1, 'Rarity code is required'),
-  category: z.string().min(1, 'Category is required'),
-  product_line_name: z.string().min(1, 'Product line is required'),
-  productId: z.coerce.number().int().min(0, 'Product ID must be a positive number'),
-  stock: z.coerce.number().int().min(0, 'Stock must be 0 or more'),
-  active: z.boolean().default(true),
-  featured: z.boolean().default(false),
+  img: z.string().min(1, 'La URL de imagen es requerida').url('Debe ser una URL válida'),
+  price: nonEmptyString('El precio'),
+  rarity: nonEmptyString('La rareza'),
+  rarityCode: nonEmptyString('El código de rareza'),
+  category: nonEmptyString('La categoría'),
+  product_line_name: nonEmptyString('La línea de producto'),
+  productId: z.coerce.number().int('Debe ser un número entero').min(0, 'Debe ser un número positivo'),
+  stock: z.coerce.number().int('Debe ser un número entero').min(0, 'El stock mínimo es 0'),
+  active: checkboxBoolean('Estado inválido').default(true),
+  featured: checkboxBoolean('Estado inválido').default(false),
 });
 
 export const updateProductSchema = z.object({
-  name: z.string().min(1, 'Name is required').optional(),
-  slug: z.string().min(1, 'Slug is required').optional(),
+  name: nonEmptyString('El nombre').optional(),
+  slug: nonEmptyString('El slug').optional(),
   type: z.enum(['card', 'box']).optional(),
-  img: z
-    .string()
-    .min(1, 'Image URL is required')
-    .url('Must be a valid URL')
-    .optional(),
-  price: z.string().min(1, 'Price is required').optional(),
-  priceArs: z.string().min(1, 'Price ARS must be at least 1').optional(),
-  rarity: z.string().min(1, 'Rarity is required').optional(),
-  rarityCode: z.string().min(1, 'Rarity code is required').optional(),
-  category: z.string().min(1, 'Category is required').optional(),
-  product_line_name: z.string().min(1, 'Product line is required').optional(),
-  productId: z.coerce.number().int().min(0, 'Product ID must be a positive number').optional(),
-  stock: z.coerce.number().int().min(0, 'Stock must be 0 or more').optional(),
-  active: z.boolean().optional(),
-  featured: z.boolean().optional(),
+  img: z.string().min(1, 'La URL de imagen es requerida').url('Debe ser una URL válida').optional(),
+  price: nonEmptyString('El precio').optional(),
+  rarity: nonEmptyString('La rareza').optional(),
+  rarityCode: nonEmptyString('El código de rareza').optional(),
+  category: nonEmptyString('La categoría').optional(),
+  product_line_name: nonEmptyString('La línea de producto').optional(),
+  productId: z.coerce.number().int('Debe ser un número entero').min(0, 'Debe ser un número positivo').optional(),
+  stock: z.coerce.number().int('Debe ser un número entero').min(0, 'El stock mínimo es 0').optional(),
+  active: checkboxBoolean('Estado inválido').optional(),
+  featured: checkboxBoolean('Estado inválido').optional(),
 });
 
 export type CreateProductInput = z.infer<typeof createProductSchema>;
