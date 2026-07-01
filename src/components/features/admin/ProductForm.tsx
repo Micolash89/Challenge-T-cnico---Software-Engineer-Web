@@ -45,6 +45,13 @@ export function ProductForm({
   const [isActive, setIsActive] = useState(
     (defaultValues.active as boolean) ?? true,
   );
+  const [values, setValues] = useState<Record<string, string>>(() => {
+    const initial: Record<string, string> = {};
+    for (const [key, val] of Object.entries(defaultValues)) {
+      initial[key] = String(val ?? "");
+    }
+    return initial;
+  });
 
   useEffect(() => {
     if (state?.success) {
@@ -55,6 +62,12 @@ export function ProductForm({
       toast.error(state.error);
     }
   }, [state, router, onClose]);
+
+  function handleChange(
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) {
+    setValues((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  }
 
   const inputClass = "min-h-10";
 
@@ -82,7 +95,8 @@ export function ProductForm({
               <Input
                 id="name"
                 name="name"
-                defaultValue={defaultValues.name as string}
+                value={values.name ?? ""}
+                onChange={handleChange}
                 className={inputClass}
               />
             </div>
@@ -93,7 +107,8 @@ export function ProductForm({
               <Input
                 id="slug"
                 name="slug"
-                defaultValue={defaultValues.slug as string}
+                value={values.slug ?? ""}
+                onChange={handleChange}
                 className={inputClass}
               />
             </div>
@@ -108,7 +123,8 @@ export function ProductForm({
               <select
                 id="type"
                 name="type"
-                defaultValue={(defaultValues.type as string) ?? "card"}
+                value={values.type ?? "card"}
+                onChange={handleChange}
                 className={`flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${inputClass}`}
               >
                 <option value="card">{F.card}</option>
@@ -122,7 +138,8 @@ export function ProductForm({
               <Input
                 id="category"
                 name="category"
-                defaultValue={defaultValues.category as string}
+                value={values.category ?? ""}
+                onChange={handleChange}
                 className={inputClass}
               />
             </div>
@@ -137,7 +154,8 @@ export function ProductForm({
               <Input
                 id="rarity"
                 name="rarity"
-                defaultValue={defaultValues.rarity as string}
+                value={values.rarity ?? ""}
+                onChange={handleChange}
                 className={inputClass}
               />
             </div>
@@ -148,7 +166,8 @@ export function ProductForm({
               <Input
                 id="rarityCode"
                 name="rarityCode"
-                defaultValue={defaultValues.rarityCode as string}
+                value={values.rarityCode ?? ""}
+                onChange={handleChange}
                 className={inputClass}
               />
             </div>
@@ -163,7 +182,8 @@ export function ProductForm({
               <Input
                 id="price"
                 name="price"
-                defaultValue={defaultValues.price as string}
+                value={values.price ?? ""}
+                onChange={handleChange}
                 className={inputClass}
               />
             </div>
@@ -178,7 +198,8 @@ export function ProductForm({
               <Input
                 id="product_line_name"
                 name="product_line_name"
-                defaultValue={defaultValues.product_line_name as string}
+                value={values.product_line_name ?? ""}
+                onChange={handleChange}
                 className={inputClass}
               />
             </div>
@@ -190,7 +211,9 @@ export function ProductForm({
                 id="productId"
                 name="productId"
                 type="text"
-                defaultValue={defaultValues.productId as string}
+                value={values.productId ?? ""}
+                onChange={handleChange}
+                placeholder="0"
                 className={inputClass}
               />
             </div>
@@ -205,7 +228,8 @@ export function ProductForm({
               <Input
                 id="img"
                 name="img"
-                defaultValue={defaultValues.img as string}
+                value={values.img ?? ""}
+                onChange={handleChange}
                 className={inputClass}
               />
             </div>
@@ -217,7 +241,8 @@ export function ProductForm({
                 id="stock"
                 name="stock"
                 type="number"
-                defaultValue={defaultValues.stock as number}
+                value={values.stock ?? ""}
+                onChange={handleChange}
                 className={inputClass}
               />
             </div>

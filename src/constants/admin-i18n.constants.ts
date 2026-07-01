@@ -35,7 +35,7 @@ export const ADMIN_I18N = {
     cancel: 'Cancelar',
     delete: 'Baja',
     deleteUser: 'Eliminar usuario',
-    reactivate: 'Reactivar',
+    reactivate: 'Alta',
     edit: 'Editar',
     editUser: 'Editar usuario',
     view: 'Ver',

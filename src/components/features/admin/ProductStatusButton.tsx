@@ -43,7 +43,7 @@ export function ProductStatusButton({ productId, active }: ProductStatusButtonPr
         className='flex items-center gap-1'
       >
         {active ? <Trash2 className="size-5 text-red-600" /> : <RotateCcw className="size-5" />}
-        <span className='text-red-600'>
+        <span className={active ? 'text-red-600' : ''}>
 
         {active ? B.delete : B.reactivate}
         </span>
@@ -59,7 +59,7 @@ export function ProductStatusButton({ productId, active }: ProductStatusButtonPr
             ? '¿Estás seguro de dar de baja este producto? Los usuarios no podrán verlo.'
             : '¿Estás seguro de reactivar este producto?'
         }
-        confirmLabel={active ? 'Dar de baja' : 'Reactivar'}
+        confirmLabel={active ? 'Dar de baja' : 'dar de alta'}
         variant={ 'default'}
         loading={isPending}
       />
