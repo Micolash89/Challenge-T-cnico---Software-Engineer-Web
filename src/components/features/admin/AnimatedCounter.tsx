@@ -34,7 +34,7 @@ export function AnimatedCounter({
       }
 
       setDisplayValue(
-        `${prefix}${formatARS(Math.floor(currentValue))}${suffix}`,
+        `${prefix}${formatARS(Number(currentValue.toFixed(2)))}${suffix}`,
       );
     }, 1000 / 60);
 
