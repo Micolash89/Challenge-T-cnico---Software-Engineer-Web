@@ -141,7 +141,7 @@ export async function createProduct(data: CreateProductInput): Promise<Product> 
       type: data.type,
       img: data.img,
       price: data.price,
-      priceArs: String(data.priceArs),
+      priceArs: '0',
       rarity: data.rarity,
       rarityCode: data.rarityCode,
       category: data.category,
@@ -164,7 +164,6 @@ export async function updateProduct(id: string, data: UpdateProductInput): Promi
   if (data.type !== undefined) updateData.type = data.type;
   if (data.img !== undefined) updateData.img = data.img;
   if (data.price !== undefined) updateData.price = data.price;
-  if (data.priceArs !== undefined) updateData.priceArs = String(data.priceArs);
   if (data.rarity !== undefined) updateData.rarity = data.rarity;
   if (data.rarityCode !== undefined) updateData.rarityCode = data.rarityCode;
   if (data.category !== undefined) updateData.category = data.category;

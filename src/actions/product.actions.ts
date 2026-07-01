@@ -15,6 +15,7 @@ import {
   getProductsByLine,
   getProductSorts,
 } from '@/services/product.service';
+import { ADMIN_I18N } from '@/constants/admin-i18n.constants';
 import type { GetProductsParams } from '@/services/product.service';
 
 export interface ActionResult {
@@ -27,10 +28,16 @@ async function checkAdminAuth(): Promise<{ error: string } | null> {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user || !['admin', 'super_admin'].includes(user.user_metadata?.role)) {
-    return { error: 'Unauthorized' };
+    return { error: ADMIN_I18N.errors.unauthorized };
   }
 
   return null;
+}
+
+function mapZodFirstError(issues: { message: string }[]): string {
+  const E = ADMIN_I18N.errors;
+  const msg = issues[0]?.message ?? E.generic;
+  return msg;
 }
 
 export async function createProductAction(
@@ -44,14 +51,17 @@ export async function createProductAction(
   const parsed = createProductSchema.safeParse(raw);
 
   if (!parsed.success) {
-    const firstError = parsed.error.issues[0]?.message ?? 'Invalid data';
-    return { error: firstError };
+    return { error: mapZodFirstError(parsed.error.issues) };
   }
 
-  await createProduct(parsed.data);
+  try {
+    await createProduct(parsed.data);
+  } catch {
+    return { error: ADMIN_I18N.errors.productCreateFailed };
+  }
 
   revalidatePath('/admin/products');
-  redirect('/admin/products');
+  return { success: true };
 }
 
 export async function updateProductAction(
@@ -66,14 +76,13 @@ export async function updateProductAction(
   const parsed = updateProductSchema.safeParse(raw);
 
   if (!parsed.success) {
-    const firstError = parsed.error.issues[0]?.message ?? 'Invalid data';
-    return { error: firstError };
+    return { error: mapZodFirstError(parsed.error.issues) };
   }
 
   await updateProduct(id, parsed.data);
 
   revalidatePath('/admin/products');
-  redirect('/admin/products');
+  return { success: true };
 }
 
 export async function softDeleteProductAction(
@@ -85,7 +94,7 @@ export async function softDeleteProductAction(
   const deleted = await softDeleteProduct(id);
 
   if (!deleted) {
-    return { success: false, error: 'Producto no encontrado' };
+    return { success: false, error: ADMIN_I18N.errors.productNotFound };
   }
 
   revalidatePath('/admin/products');
@@ -101,7 +110,7 @@ export async function reactivateProductAction(
   const product = await reactivateProduct(id);
 
   if (!product) {
-    return { success: false, error: 'Producto no encontrado' };
+    return { success: false, error: ADMIN_I18N.errors.productNotFound };
   }
 
   revalidatePath('/admin/products');

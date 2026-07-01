@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { X,  ShoppingBag, ShoppingBagIcon } from "lucide-react";
+import { X, ShoppingBag, ShoppingBagIcon,  Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCartStore } from "@/hooks/useCartStore";
@@ -90,12 +90,15 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
             </div>
             <p className="text-body text-graphite">Tu carrito está vacío</p>
             <Link
-              href={ROUTES.HOME}
+              href={ROUTES.YUGIOH}
               onClick={onClose}
-              className="text-body-sm font-medium text-cobalt-link underline-offset-2 hover:underline"
+              className="text-body-sm font-medium text-cobalt-link underline-offset-2 hover:cursor-pointer rounded-lg bg-primary px-6 py-3 text-snow transition-opacity hover:bg-primary/80"
             >
               Ver productos
             </Link>
+
+
+
           </div>
         )}
 
@@ -140,7 +143,7 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
                             {item.stock} disponibles
                           </p>
                         </div>
-                     <RemoveItemCartButton item={item} />
+                        <RemoveItemCartButton item={item} />
                       </div>
                       <div className="flex items-center justify-between">
                         {/* Quantity controls */}
@@ -180,16 +183,18 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
               <div className="flex gap-3">
                 <button
                   onClick={() => setClearModalOpen(true)}
-                  className="flex-1 rounded-lg border border-silver-mist px-4 py-2.5 text-body-sm font-medium text-graphite transition-colors hover:bg-fog hover:text-ink cursor-pointer"
+                  className="flex-1 rounded-lg border border-silver-mist px-4 py-2.5 text-body-sm font-medium text-graphite transition-colors hover:bg-fog hover:text-ink cursor-pointer group flex items-center justify-center gap-2"
                 >
-                  Vaciar
+                  <span>Vaciar</span>
+                  <Trash2 className="size-5 mr-2 inline-block group:hover:bg-fog group-hover:rotate-20 duration-300" />
                 </button>
                 <Link
                   href={ROUTES.CART}
                   onClick={onClose}
-                  className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-center text-body-sm font-medium text-snow transition-opacity hover:opacity-90 cursor-pointer"
+                  className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-center text-body-sm font-medium text-snow transition-opacity hover:opacity-90 cursor-pointer group flex items-center justify-center gap-2"
                 >
-                  Ver carrito
+                  <span>Ver carrito</span>
+                  <ShoppingBag className="size-5 mr-2 inline-block group-hover:rotate-20 duration-300" />
                 </Link>
               </div>
             </div>

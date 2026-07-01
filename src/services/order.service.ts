@@ -68,32 +68,26 @@ export async function getOrder(orderId: string) {
   return { ...order, items };
 }
 
-export async function updateOrderToPaid(
-  orderId: string,
-  mpPaymentId: string,
-) {
+export async function adminMarkAsPaid(orderId: string) {
   const db = getDb();
 
   await db.transaction(async (tx) => {
-    // Get the order
     const [order] = await tx
       .select()
       .from(orders)
       .where(eq(orders.id, orderId))
       .limit(1);
 
-    if (!order) throw new Error('Order not found');
+    if (!order) throw new Error('Pedido no encontrado');
     if (order.status !== 'reservado') {
-      throw new Error(`Order cannot transition from ${order.status} to pagado`);
+      throw new Error('Solo pedidos reservados pueden marcarse como pagados');
     }
 
-    // Get order items
     const items = await tx
       .select()
       .from(orderItems)
       .where(eq(orderItems.orderId, orderId));
 
-    // Decrement stock for each item with safety check
     for (const item of items) {
       const result = await tx
         .update(products)
@@ -107,18 +101,16 @@ export async function updateOrderToPaid(
 
       if (result.count === 0) {
         throw new Error(
-          `Error al actualizar stock: producto ${item.productId}. Stock insuficiente.`,
+          `Stock insuficiente para ${item.productName}`,
         );
       }
     }
 
-    // Update order status
     await tx
       .update(orders)
-      .set({
-        status: 'pagado',
-        mpPaymentId,
-      })
+      .set({ status: 'pagado' })
       .where(eq(orders.id, orderId));
   });
 }
+
+

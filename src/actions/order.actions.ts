@@ -1,9 +1,12 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { eq } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
+import { db as getDb } from '@/db';
+import { orderItems } from '@/db/schema';
 import { preferenceClient } from '@/lib/mercadopago';
-import { createOrder, getOrder } from '@/services/order.service';
+import { createOrder, getOrder, adminMarkAsPaid } from '@/services/order.service';
 import { createOrderSchema } from '@/lib/validations/order.schema';
 
 export interface OrderActionResult {
@@ -42,6 +45,21 @@ async function checkAdminAuth(): Promise<UpdateOrderResult | null> {
   return null;
 }
 
+export async function getOrderItemsAction(
+  orderId: string,
+): Promise<{ items: Array<Record<string, unknown>> } | UpdateOrderResult> {
+  const authError = await checkAdminAuth();
+  if (authError) return authError;
+
+  const db = getDb();
+  const items = await db
+    .select()
+    .from(orderItems)
+    .where(eq(orderItems.orderId, orderId));
+
+  return { items: items as Array<Record<string, unknown>> };
+}
+
 export async function updateOrderStatusAction(
   orderId: string,
   newStatus: 'pagado' | 'cancelado',
@@ -49,51 +67,29 @@ export async function updateOrderStatusAction(
   const authError = await checkAdminAuth();
   if (authError) return authError;
 
-  const supabase = await createClient();
-
-  const { data: order, error: fetchError } = await supabase
-    .from('orders')
-    .select('status')
-    .eq('id', orderId)
-    .single();
-
-  if (fetchError || !order) {
-    return { error: 'Pedido no encontrado' };
-  }
-
-  if (order.status !== 'reservado') {
-    return { error: 'Solo pedidos en estado reservado pueden actualizarse' };
-  }
-
   if (newStatus === 'pagado') {
-    const { data: items, error: itemsError } = await supabase
-      .from('order_items')
-      .select('product_id, quantity')
-      .eq('order_id', orderId);
-
-    if (itemsError) {
-      return { error: itemsError.message };
+    try {
+      await adminMarkAsPaid(orderId);
+    } catch (err) {
+      return { error: err instanceof Error ? err.message : 'Error al actualizar el pedido' };
     }
+  } else {
+    const supabase = await createClient();
+    const { data: order, error: fetchError } = await supabase
+      .from('orders')
+      .select('status')
+      .eq('id', orderId)
+      .single();
 
-    for (const item of items ?? []) {
-      const { error: stockError } = await supabase.rpc('decrement_stock', {
-        p_product_id: item.product_id,
-        p_quantity: item.quantity,
-      });
+    if (fetchError || !order) return { error: 'Pedido no encontrado' };
+    if (order.status !== 'reservado') return { error: 'Solo pedidos reservados pueden cancelarse' };
 
-      if (stockError) {
-        return { error: `Error al actualizar stock: ${stockError.message}` };
-      }
-    }
-  }
+    const { error: updateError } = await supabase
+      .from('orders')
+      .update({ status: 'cancelado' })
+      .eq('id', orderId);
 
-  const { error: updateError } = await supabase
-    .from('orders')
-    .update({ status: newStatus })
-    .eq('id', orderId);
-
-  if (updateError) {
-    return { error: updateError.message };
+    if (updateError) return { error: updateError.message };
   }
 
   revalidatePath('/admin/orders');
@@ -223,14 +219,6 @@ export async function createOrderAction(
     console.error('MP preference error:', err);
     return { error: 'Error al crear la preferencia de pago. Intentalo de nuevo.' };
   }
-}
-
-export async function verifyPaymentAction(
-  orderId: string,
-): Promise<{ verified: boolean; error?: string }> {
-  const order = await getOrder(orderId);
-  if (!order) return { verified: false, error: 'Pedido no encontrado' };
-  return { verified: order.status === 'pagado' };
 }
 
 export async function getOrderForReservationAction(

@@ -55,7 +55,7 @@ export function CatalogFilters({ categories, rarities }: CatalogFiltersProps) {
     <div className="flex flex-wrap items-end gap-3">
       {/* Search */}
       <div className="relative w-full sm:w-64">
-        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-graphite" />
+        <Search className="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-graphite" />
         <Input
           defaultValue={activeSearch}
           onChange={(e) => debouncedSearch(e.target.value)}
@@ -69,12 +69,12 @@ export function CatalogFilters({ categories, rarities }: CatalogFiltersProps) {
         variant={activeStock ? "default" : "outline"}
         size="sm"
         onClick={() => updateParams({ stock: activeStock ? 'false' : '' })}
-        className="h-9 gap-1.5"
+        className="h-9 gap-1.5 cursor-pointer"
       >
         {activeStock ? (
-          <PackageCheck className="size-4" />
+          <PackageCheck className="size-5" />
         ) : (
-          <Package className="size-4" />
+          <Package className="size-5" />
         )}
         En stock
       </Button>
@@ -84,13 +84,13 @@ export function CatalogFilters({ categories, rarities }: CatalogFiltersProps) {
         value={activeCategory}
         onValueChange={(value) => updateParams({ category: value === 'all' ? '' : value })}
       >
-        <SelectTrigger className="h-9 min-w-[140px] rounded-lg border border-silver-mist bg-snow text-body-sm text-ink">
+        <SelectTrigger className="min-h-[33px] min-w-[200px] rounded-lg border border-silver-mist bg-white text-body-sm text-ink hover:cursor-pointer">
           <SelectValue placeholder="Categoría" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">
             <span className="flex items-center gap-2">
-              <Package className="size-4" />
+              <Package className="size-5" />
               Todas
             </span>
           </SelectItem>
@@ -107,13 +107,13 @@ export function CatalogFilters({ categories, rarities }: CatalogFiltersProps) {
         value={activeRarity}
         onValueChange={(value) => updateParams({ rarity: value === 'all' ? '' : value })}
       >
-        <SelectTrigger className="h-9 min-w-[140px] rounded-lg border border-silver-mist bg-snow text-body-sm text-ink">
-          <SelectValue placeholder="Rareza" />
+        <SelectTrigger className="min-h-[33px] min-w-[200px] rounded-lg border border-silver-mist bg-white text-body-sm text-ink hover:cursor-pointer">
+          <SelectValue placeholder="Rareza"  />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">
             <span className="flex items-center gap-2">
-              <Sparkles className="size-4" />
+              <Sparkles className="size-5" />
               Todas
             </span>
           </SelectItem>

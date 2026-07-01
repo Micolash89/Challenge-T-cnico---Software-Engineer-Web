@@ -49,11 +49,10 @@ export default function CartPage() {
         <div className="flex items-center justify-between transition-colors">
           <div className="w-full">
             <div className="w-fit">
-            <LinkShopButton url={ROUTES.YUGIOH} message="Seguir comprando" />
-
+              <LinkShopButton url={ROUTES.YUGIOH} message="Seguir comprando" />
             </div>
             <div className="flex items-center justify-between w-full">
-              <div className="flex items-center gap-2">
+              <div className="flex items-start md:items-center gap-0 md:gap-2 flex-col md:flex-row">
                 <h1 className="font-heading text-heading font-semibold text-ink flex items-center gap-2">
                   <ShoppingBagIcon size={35} />
                   <span>Carrito</span>
@@ -108,7 +107,8 @@ export default function CartPage() {
                       {item.name}
                     </h3>
                     <p className=" text-xs text-graphite">
-                      {item.rarity} - {item.category} - {" ( "}{item.stock} disponibles{" )"}
+                      {item.rarity} - {item.category} - {" ( "}
+                      {item.stock} disponibles{" )"}
                     </p>
                   </div>
                   <RemoveItemCartButton item={item} />
@@ -137,7 +137,7 @@ export default function CartPage() {
           initial="hidden"
           animate="visible"
           transition={{ delay: 0.15 }}
-          className="mt-8 h-fit ml-auto flex max-w-sm flex-col gap-4 rounded-lg bg-snow p-6 md:sticky md:top-15 w-full"
+          className="mt-8 h-fit ml-auto flex w-full md:max-w-sm flex-col gap-4 rounded-lg bg-snow p-6 md:sticky md:top-15 w-full"
         >
           <div className="flex items-center justify-between">
             <span className="text-body text-graphite">Subtotal</span>
@@ -162,10 +162,7 @@ export default function CartPage() {
             onClick={() => router.push("/checkout")}
             className="mt-2 bg-black hover:bg-ink/80 rounded-lg hover:cursor-pointer px-6 py-3 text-body font-medium text-snow transition-opacity hover:opacity-90 flex items-center justify-center"
           >
-            <span>
-            Continuar compra
-
-            </span>
+            <span>Continuar compra</span>
             <ArrowRight className="size-5 ml-2 inline-block text-white" />
           </button>
         </motion.div>

@@ -28,7 +28,10 @@ interface OrdersTableProps {
 }
 
 export function OrdersTable({ orders }: OrdersTableProps) {
-  const [selectedOrder, setSelectedOrder] = useState<Record<string, unknown> | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
 
   return (
     <motion.div
@@ -45,7 +48,9 @@ export function OrdersTable({ orders }: OrdersTableProps) {
             className="rounded-lg border bg-card p-4"
           >
             <div className="mb-2 flex items-center justify-between">
-              <p className="text-sm font-medium">Pedido #{(order.id as string).slice(0, 8)}</p>
+              <p className="text-sm font-medium">
+                Pedido #{(order.id as string).slice(0, 8)}
+              </p>
               <span
                 className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold text-white ${
                   order.status === "pagado"
@@ -68,7 +73,11 @@ export function OrdersTable({ orders }: OrdersTableProps) {
             </div>
             <div className="mb-3 flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Fecha:</span>
-              <span>{new Date(String(order.created_at ?? order.createdAt)).toLocaleDateString()}</span>
+              <span>
+                {new Date(
+                  String(order.created_at ?? order.createdAt),
+                ).toLocaleDateString()}
+              </span>
             </div>
             <Button
               variant="outline"
@@ -88,7 +97,7 @@ export function OrdersTable({ orders }: OrdersTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>{T.product}</TableHead>
+              <TableHead>Pedido #</TableHead>
               <TableHead>{T.total}</TableHead>
               <TableHead>{T.status}</TableHead>
               <TableHead>{T.paymentMethod}</TableHead>
@@ -100,12 +109,12 @@ export function OrdersTable({ orders }: OrdersTableProps) {
             {orders.map((order) => (
               <TableRow key={order.id as string}>
                 <TableCell className="font-medium">
-                  Pedido #{(order.id as string).slice(0, 8)}
+                  {(order.id as string).slice(0, 8)}
                 </TableCell>
                 <TableCell>${formatARS(order.total_ars)}</TableCell>
                 <TableCell>
                   <span
-                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold text-white ${
+                    className={`inline-flex items-center rounded-lg px-2.5 py-0.5 text-xs font-semibold text-white ${
                       order.status === "pagado"
                         ? "bg-[hsl(142,76%,36%)]"
                         : order.status === "cancelado"
@@ -116,17 +125,25 @@ export function OrdersTable({ orders }: OrdersTableProps) {
                     {S[order.status as keyof typeof S] ?? String(order.status)}
                   </span>
                 </TableCell>
-                <TableCell className="text-muted-foreground">
-                  {String(order.payment_method ?? order.paymentMethod)}
+                <TableCell className="text-muted-foreground flex items-center gap-2">
+                  <span>
+                    {order.payment_method === "mercadopago"
+                      ? "Mercado Pago"
+                      : "Deposito/Efectivo"}
+                  </span>
+                  
                 </TableCell>
                 <TableCell className="text-muted-foreground">
-                  {new Date(String(order.created_at ?? order.createdAt)).toLocaleDateString()}
+                  {new Date(
+                    String(order.created_at ?? order.createdAt),
+                  ).toLocaleDateString()}
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className="text-right ">
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => setSelectedOrder(order)}
+                    className="mr-5"
                   >
                     <Eye className="size-5" />
                   </Button>

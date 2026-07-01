@@ -59,7 +59,7 @@ export function AdminSidebar() {
       >
         {/* Header with branding */}
         <div className="relative flex h-13 items-center justify-between border-b px-6">
-          <h2 className="text-lg font-semibold">La Rata Duelista</h2>
+          <h2 className="text-lg font-semibold">TCG Store</h2>
           <Image
             src="/images/rata-duelista-logo-1.jpg"
             alt="Logo"
@@ -85,7 +85,7 @@ export function AdminSidebar() {
               <motion.div
                 key={item.href}
                 variants={variantsParams("y", 0.35, index * 0.08, 12)}
-                className="flex items-center gap-1"
+                className="flex items-center gap-1 "
               >
                 <Link
                   href={item.href}
@@ -93,7 +93,7 @@ export function AdminSidebar() {
                   className={cn(
                     "flex flex-1 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                     active
-                      ? "bg-primary text-primary-foreground"
+                      ? "bg-primary text-primary-foreground "
                       : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
                   )}
                 >

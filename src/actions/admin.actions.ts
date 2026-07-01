@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 export interface ActionResult {
   error?: string;
@@ -34,6 +35,15 @@ export interface UserProfile {
   role: string;
 }
 
+function mapAuthUser(u: { id: string; email?: string; user_metadata?: Record<string, unknown> }): UserProfile {
+  return {
+    id: u.id,
+    email: u.email,
+    name: (u.user_metadata?.full_name as string) ?? (u.user_metadata?.name as string),
+    role: (u.user_metadata?.role as string) ?? 'user',
+  };
+}
+
 export async function getAllUsersAction(params: {
   page?: number;
   pageSize?: number;
@@ -41,32 +51,24 @@ export async function getAllUsersAction(params: {
   const authError = await checkAdminAuth();
   if (authError) return authError;
 
-  const supabase = await createClient();
+  const adminClient = createAdminClient();
   const page = params.page ?? 1;
   const pageSize = params.pageSize ?? 10;
 
-  const { data: users, error, count } = await supabase
-    .from('profiles')
-    .select('*', { count: 'exact' })
-    .order('created_at', { ascending: false })
-    .range((page - 1) * pageSize, page * pageSize - 1);
+  const { data, error } = await adminClient.auth.admin.listUsers();
 
-  if (error) {
-    return { error: error.message };
-  }
+  if (error) return { error: error.message };
 
-  const data: UserProfile[] = (users ?? []).map((u) => ({
-    id: u.id,
-    email: u.email,
-    name: u.full_name ?? u.name,
-    role: u.role ?? 'user',
-  }));
+  const allUsers = data?.users ?? [];
+
+  const start = (page - 1) * pageSize;
+  const paged = allUsers.slice(start, start + pageSize);
 
   return {
-    data,
-    total: count ?? 0,
+    data: paged.map(mapAuthUser),
+    total: allUsers.length,
     page,
-    totalPages: Math.ceil((count ?? 0) / pageSize),
+    totalPages: Math.max(1, Math.ceil(allUsers.length / pageSize)),
   };
 }
 
@@ -74,77 +76,28 @@ export async function getUserByIdAction(id: string): Promise<UserProfile | Actio
   const authError = await checkAdminAuth();
   if (authError) return authError;
 
-  const supabase = await createClient();
-  const { data: user, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', id)
-    .single();
+  const adminClient = createAdminClient();
+  const { data, error } = await adminClient.auth.admin.getUserById(id);
 
-  if (error || !user) {
-    return { error: 'User not found' };
-  }
+  if (error || !data?.user) return { error: 'Usuario no encontrado' };
 
-  return {
-    id: user.id,
-    email: user.email,
-    name: user.full_name ?? user.name,
-    role: user.role ?? 'user',
-  };
+  return mapAuthUser(data.user);
 }
 
 export async function updateUserAction(
   id: string,
   _prev: ActionResult | null | undefined,
   formData: FormData,
-): Promise<ActionResult | undefined> {
+): Promise<ActionResult> {
   const authError = await checkAdminAuth();
   if (authError) return authError;
 
   const name = formData.get('name') as string;
-  const email = formData.get('email') as string;
 
-  const supabase = await createClient();
-  const { error } = await supabase
-    .from('profiles')
-    .update({ full_name: name, email })
-    .eq('id', id);
-
-  if (error) {
-    return { error: error.message };
-  }
-
-  revalidatePath(`/admin/users/${id}`);
-  return { success: true };
-}
-
-export async function promoteUserAction(userId: string): Promise<ActionResult> {
-  const authError = await checkAdminAuth();
-  if (authError) return authError;
-
-  const supabase = await createClient();
-  const { data: currentUser } = await supabase.auth.getUser();
-  if (currentUser?.user?.id === userId) {
-    return { error: 'No puedes modificar tu propio rol' };
-  }
-
-  const { data: target } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', userId)
-    .single();
-
-  const currentRole = target?.role;
-  let newRole: string;
-
-  if (currentRole === 'user') newRole = 'admin';
-  else if (currentRole === 'admin') newRole = 'super_admin';
-  else return { error: 'No se puede ascender más' };
-
-  const { error } = await supabase
-    .from('profiles')
-    .update({ role: newRole })
-    .eq('id', userId);
+  const adminClient = createAdminClient();
+  const { error } = await adminClient.auth.admin.updateUserById(id, {
+    user_metadata: { full_name: name },
+  });
 
   if (error) return { error: error.message };
 
@@ -152,33 +105,19 @@ export async function promoteUserAction(userId: string): Promise<ActionResult> {
   return { success: true };
 }
 
-export async function demoteUserAction(userId: string): Promise<ActionResult> {
+export async function deleteUserAction(userId: string): Promise<ActionResult> {
   const authError = await checkAdminAuth();
   if (authError) return authError;
 
   const supabase = await createClient();
-  const { data: currentUser } = await supabase.auth.getUser();
-  if (currentUser?.user?.id === userId) {
-    return { error: 'No puedes modificar tu propio rol' };
+  const { data: { user: currentUser } } = await supabase.auth.getUser();
+
+  if (currentUser?.id === userId) {
+    return { error: 'No puedes eliminarte a ti mismo' };
   }
 
-  const { data: target } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', userId)
-    .single();
-
-  const currentRole = target?.role;
-  let newRole: string;
-
-  if (currentRole === 'super_admin') newRole = 'admin';
-  else if (currentRole === 'admin') newRole = 'user';
-  else return { error: 'No se puede descender más' };
-
-  const { error } = await supabase
-    .from('profiles')
-    .update({ role: newRole })
-    .eq('id', userId);
+  const adminClient = createAdminClient();
+  const { error } = await adminClient.auth.admin.deleteUser(userId);
 
   if (error) return { error: error.message };
 
@@ -251,10 +190,11 @@ export async function getAllProductsAction(params: {
         id: string;
         name: string;
         slug: string;
+        img: string;
+        price: string;
         category: string;
         rarity: string;
         stock: number;
-        price_ars: number;
         active: boolean;
         product_line_name: string;
       }>;
@@ -274,10 +214,10 @@ export async function getAllProductsAction(params: {
   let query = supabase
     .from('products')
     .select(
-      'id, name, slug, category, rarity, stock, price_ars, active, product_line_name',
+      'id, name, slug, img, price, category, rarity, stock, active, product_line_name',
       { count: 'exact' },
     )
-    .order('created_at', { ascending: false })
+    .order('name', { ascending: true })
     .range((page - 1) * pageSize, page * pageSize - 1);
 
   if (params.category) {

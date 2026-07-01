@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { AdminSidebar } from '@/components/features/admin/AdminSidebar';
+import { Toaster } from '@/components/ui/sonner';
 
 
 export default async function AdminLayout({
@@ -22,7 +23,7 @@ export default async function AdminLayout({
       <main className="flex-1 p-6">
         {children}
       </main>
-     
+      <Toaster position="top-right" />
     </div>
   );
 }
