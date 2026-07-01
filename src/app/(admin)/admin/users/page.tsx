@@ -20,6 +20,7 @@ export default async function UsersPage({ searchParams }: PageProps) {
   const supabase = await createClient();
   const { data: { user: currentUser } } = await supabase.auth.getUser();
   const currentUserId = currentUser?.id ?? '';
+  const currentUserRole = (currentUser?.user_metadata?.role as string) ?? 'user';
 
   const result = await getAllUsersAction({ page: currentPage, pageSize: 10 });
 
@@ -50,7 +51,7 @@ export default async function UsersPage({ searchParams }: PageProps) {
         <p className="text-muted-foreground">{ADMIN_I18N.empty.noUsers}</p>
       ) : (
         <>
-          <UsersTable users={userData} currentUserId={currentUserId} />
+          <UsersTable users={userData} currentUserId={currentUserId} currentUserRole={currentUserRole} />
 
           <Pagination
             currentPage={currentPage}
