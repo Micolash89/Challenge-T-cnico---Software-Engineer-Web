@@ -54,10 +54,10 @@ export function RegisterForm() {
         />
       </div>
 
-      <Button type="submit" disabled={pending} className="mt-2 w-full">
+      <Button type="submit" disabled={pending} className="mt-2 w-full h-10 rounded-lg">
         {pending ? (
           <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <Loader2 className="mr-2 size-5 animate-spin" />
             Creando cuenta...
           </>
         ) : (

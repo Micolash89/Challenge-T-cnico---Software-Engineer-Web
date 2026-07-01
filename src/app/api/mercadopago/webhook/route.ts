@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { updateOrderToPaid } from '@/services/order.service';
+import { createPaidOrderFromSession } from '@/services/order.service';
 import crypto from 'node:crypto';
 
 const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN ?? '';
@@ -101,10 +101,10 @@ async function processPayment(paymentId: string) {
     console.log(`[MP Webhook] Payment ${paymentId}: status=${payment.status}`);
 
     if (payment.status === 'approved') {
-      const orderId = payment.external_reference;
-      if (orderId) {
-        await updateOrderToPaid(orderId, paymentId);
-        console.log(`[MP Webhook] Order ${orderId} updated to pagado`);
+      const externalReference = payment.external_reference;
+      if (externalReference) {
+        await createPaidOrderFromSession(externalReference, paymentId);
+        console.log(`[MP Webhook] Order created from session ${externalReference}`);
       }
     }
   } catch (err) {
@@ -141,9 +141,9 @@ async function processMerchantOrder(merchantOrderId: string) {
     );
 
     if (approvedPayment && order.external_reference) {
-      await updateOrderToPaid(order.external_reference, approvedPayment.id);
+      await createPaidOrderFromSession(order.external_reference, approvedPayment.id);
       console.log(
-        `[MP Webhook] Order ${order.external_reference} updated to pagado via merchant_order`,
+        `[MP Webhook] Order created from session ${order.external_reference} via merchant_order`,
       );
     }
   } catch (err) {
