@@ -7,11 +7,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { signInAction } from '@/actions/auth.actions';
 
-export function LoginForm() {
+export function LoginForm({ redirectTo = '/' }: { redirectTo?: string }) {
   const [state, formAction, pending] = useActionState(signInAction, null);
 
   return (<>
     <form action={formAction} className="flex flex-col gap-4">
+      <input type="hidden" name="redirect" value={redirectTo} />
       {state?.error && (
         <div className="rounded-xl bg-caution/10 px-4 py-3 text-body-sm text-caution">
           {state.error}

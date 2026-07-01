@@ -13,7 +13,12 @@ export const metadata = {
   title: 'Iniciar sesión — TCG Store',
 };
 
-export default function LoginPage() {
+export default async function LoginPage(props: {
+  searchParams?: Promise<{ redirect?: string }>;
+}) {
+  const searchParams = await props.searchParams;
+  const redirectTo = searchParams?.redirect ?? '/';
+
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>
@@ -23,7 +28,7 @@ export default function LoginPage() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <LoginForm />
+        <LoginForm redirectTo={redirectTo} />
 
         <p className="mt-6 text-center text-body-sm text-graphite ">
           ¿No tenés cuenta?{' '}

@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useActionState } from "react";
 import Image from "next/image";
 import { Loader2, Banknote, CircleCheck } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { initMercadoPago, Wallet } from "@mercadopago/sdk-react";
 import { useCartStore } from "@/hooks/useCartStore";
-import { createOrderAction, createMpPreferenceAction } from "@/actions/order.actions";
+import { createOrderAction } from "@/actions/order.actions";
 import { ROUTES } from "@/constants/routes.constants";
 import EmptyCart from "@/components/features/cart/EmptyCart";
 import LinkShopButton from "@/components/features/cart/LinkShopButton";
@@ -28,49 +28,22 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<
     "mercadopago" | "whatsapp_efectivo" | null
   >(null);
-  const [preferenceId, setPreferenceId] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
+  const [state, formAction, pending] = useActionState(createOrderAction, null);
   const mpInitRef = useRef(false);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (!paymentMethod) {
-      toast.error("Seleccioná un método de pago");
-      return;
+  useEffect(() => {
+    if (state?.redirectUrl && state.paymentMethod === "whatsapp_efectivo") {
+      clearCart();
+      window.location.href = state.redirectUrl;
     }
-    setPending(true);
-
-    const formData = new FormData(e.currentTarget);
-    formData.set("paymentMethod", paymentMethod);
-
-    if (paymentMethod === "mercadopago") {
-      const result = await createMpPreferenceAction(null, formData);
-      if (result.preferenceId) {
-        setPreferenceId(result.preferenceId);
-      }
-      if (result.error) {
-        toast.error(result.error);
-      }
-    } else {
-      const result = await createOrderAction(null, formData);
-      if (result.redirectUrl) {
-        clearCart();
-        window.location.href = result.redirectUrl;
-      }
-      if (result.error) {
-        toast.error(result.error);
-      }
-    }
-
-    setPending(false);
-  }
+  }, [state?.redirectUrl, state?.paymentMethod, clearCart]);
 
   useEffect(() => {
-    if (preferenceId && !mpInitRef.current) {
+    if (state?.preferenceId && !mpInitRef.current) {
       initMercadoPago(PUBLIC_KEY);
       mpInitRef.current = true;
     }
-  }, [preferenceId]);
+  }, [state?.preferenceId]);
 
   if (items.length === 0 && !pending) {
     return <EmptyCart url={ROUTES.HOME} />;
@@ -103,18 +76,25 @@ export default function CheckoutPage() {
             </h1>
           </div>
 
-          {preferenceId && paymentMethod === "mercadopago" ? (
+          {state?.preferenceId && paymentMethod === "mercadopago" ? (
             <div className="max-w-sm">
               <p className="mb-4 text-body-sm text-graphite">
                 Hacé clic en el botón de Mercado Pago para ir al pago
               </p>
-              <Wallet initialization={{ preferenceId }} />
+              <Wallet initialization={{ preferenceId: state.preferenceId }} />
             </div>
           ) : (
             <form
-              onSubmit={handleSubmit}
+              action={formAction}
+              onSubmit={(e) => {
+                if (!paymentMethod) {
+                  e.preventDefault();
+                  toast.error("Seleccioná un método de pago");
+                }
+              }}
               className="md:sticky md:top-21"
             >
+              <input type="hidden" name="paymentMethod" value={paymentMethod ?? ""} />
               <input
                 type="hidden"
                 name="items"
@@ -289,3 +269,4 @@ export default function CheckoutPage() {
     </div>
   );
 }
+
