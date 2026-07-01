@@ -2,8 +2,15 @@
 
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
+import { randomUUID } from 'node:crypto';
 import { preferenceClient } from '@/lib/mercadopago';
-import { createOrder, deleteOrder, getOrder } from '@/services/order.service';
+import {
+  createOrder,
+  getOrder,
+  createPaymentSession,
+  getPaymentSession,
+  updatePaymentSessionPreferenceId,
+} from '@/services/order.service';
 import { createOrderSchema } from '@/lib/validations/order.schema';
 
 export interface OrderActionResult {
@@ -146,29 +153,6 @@ export async function createOrderAction(
   const { data: { user } } = await supabase.auth.getUser();
   const userId = user?.id ?? null;
 
-  if (paymentMethod === 'whatsapp_efectivo') {
-    const order = await createOrder({
-      userId,
-      paymentMethod: parsed.data.paymentMethod,
-      totalArs: parsed.data.total,
-      items: parsed.data.items.map((item) => ({
-        productId: item.id,
-        quantity: item.quantity,
-        priceArs: item.price_ars,
-        name: item.name,
-        img: item.img,
-        rarity: item.rarity,
-      })),
-    });
-
-    return {
-      orderId: order.id,
-      paymentMethod: 'whatsapp_efectivo',
-      redirectUrl: `/checkout/reservation?order=${order.id}`,
-    };
-  }
-
-  // For MP: create order first, then MP preference with external_reference
   const order = await createOrder({
     userId,
     paymentMethod: parsed.data.paymentMethod,
@@ -181,6 +165,59 @@ export async function createOrderAction(
       img: item.img,
       rarity: item.rarity,
     })),
+  });
+
+  return {
+    orderId: order.id,
+    paymentMethod: 'whatsapp_efectivo',
+    redirectUrl: `/checkout/reservation?order=${order.id}`,
+  };
+}
+
+export async function createMpPreferenceAction(
+  _prev: OrderActionResult | null,
+  formData: FormData,
+): Promise<OrderActionResult> {
+  const itemsRaw = formData.get('items') as string;
+  const totalRaw = formData.get('total') as string;
+
+  let items: Array<{
+    id: string;
+    quantity: number;
+    price_ars: number;
+    name: string;
+    img: string;
+    rarity: string;
+  }>;
+
+  try {
+    items = JSON.parse(itemsRaw);
+  } catch {
+    return { error: 'Error al leer los items del carrito' };
+  }
+
+  const parsed = createOrderSchema.safeParse({
+    paymentMethod: 'mercadopago',
+    items,
+    total: Number(totalRaw),
+  });
+
+  if (!parsed.success) {
+    const firstError = parsed.error.issues[0]?.message ?? 'Datos inválidos';
+    return { error: firstError };
+  }
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const userId = user?.id ?? null;
+
+  const externalReference = randomUUID();
+
+  await createPaymentSession({
+    userId,
+    totalArs: parsed.data.total,
+    items: parsed.data.items,
+    externalReference,
   });
 
   try {
@@ -197,7 +234,7 @@ export async function createOrderAction(
             currency_id: 'ARS',
           };
         }),
-        external_reference: order.id,
+        external_reference: externalReference,
         back_urls: {
           success: `${process.env.NEXT_PUBLIC_URL}/checkout/success`,
           failure: `${process.env.NEXT_PUBLIC_URL}/checkout/failure`,
@@ -208,17 +245,40 @@ export async function createOrderAction(
       },
     });
 
+    const preferenceId = mpPreference.id;
+    if (!preferenceId) {
+      return { error: 'Error al crear la preferencia de pago. Intentalo de nuevo.' };
+    }
+
+    await updatePaymentSessionPreferenceId(externalReference, preferenceId);
+
     return {
-      orderId: order.id,
       paymentMethod: 'mercadopago',
-      preferenceId: mpPreference.id,
-      redirectUrl: mpPreference.init_point,
+      preferenceId,
     };
   } catch (err) {
     console.error('MP preference error:', err);
-    await deleteOrder(order.id);
-    return { error: 'Error al crear la preferencia de pago. Se canceló el pedido.' };
+    return { error: 'Error al crear la preferencia de pago. Intentalo de nuevo.' };
   }
+}
+
+export interface VerifyPaymentResult {
+  verified: boolean;
+  orderId?: string;
+  error?: string;
+}
+
+export async function verifyPaymentAction(
+  externalReference: string,
+): Promise<VerifyPaymentResult> {
+  const session = await getPaymentSession(externalReference);
+  if (!session) {
+    return { verified: false, error: 'Sesión de pago no encontrada' };
+  }
+  if (!session.completed) {
+    return { verified: false };
+  }
+  return { verified: true };
 }
 
 export async function getOrderForReservationAction(

@@ -25,11 +25,11 @@ export default function LoginPage() {
       <CardContent>
         <LoginForm />
 
-        <p className="mt-6 text-center text-body-sm text-graphite">
+        <p className="mt-6 text-center text-body-sm text-graphite ">
           ¿No tenés cuenta?{' '}
           <Link
             href={ROUTES.REGISTER}
-            className="font-medium text-cobalt-link underline-offset-2 hover:underline"
+            className="font-medium text-cobalt-link underline-offset-2 hover:underline "
           >
             Registrate
           </Link>

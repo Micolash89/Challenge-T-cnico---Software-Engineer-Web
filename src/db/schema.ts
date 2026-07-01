@@ -7,6 +7,7 @@ import {
   decimal,
   boolean,
   timestamp,
+  jsonb,
 } from 'drizzle-orm/pg-core';
 
 // ── Enums ──
@@ -74,6 +75,19 @@ export const orderItems = pgTable('order_items', {
   productRarity: text('product_rarity').notNull(),
 });
 
+// ── Payment Sessions (temporary, before order is created) ──
+export const paymentSessions = pgTable('payment_sessions', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  items: jsonb('items').notNull(),
+  totalArs: decimal('total_ars', { precision: 12, scale: 2 }).notNull(),
+  userId: uuid('user_id'),
+  externalReference: text('external_reference').notNull().unique(),
+  preferenceId: text('preference_id'),
+  completed: boolean('completed').notNull().default(false),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
 // ── Inferred Types ──
 export type Product = typeof products.$inferSelect;
 export type NewProduct = typeof products.$inferInsert;
@@ -81,3 +95,5 @@ export type Order = typeof orders.$inferSelect;
 export type NewOrder = typeof orders.$inferInsert;
 export type OrderItem = typeof orderItems.$inferSelect;
 export type NewOrderItem = typeof orderItems.$inferInsert;
+export type PaymentSession = typeof paymentSessions.$inferSelect;
+export type NewPaymentSession = typeof paymentSessions.$inferInsert;

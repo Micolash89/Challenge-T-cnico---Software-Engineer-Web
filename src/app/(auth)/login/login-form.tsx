@@ -10,7 +10,7 @@ import { signInAction } from '@/actions/auth.actions';
 export function LoginForm() {
   const [state, formAction, pending] = useActionState(signInAction, null);
 
-  return (
+  return (<>
     <form action={formAction} className="flex flex-col gap-4">
       {state?.error && (
         <div className="rounded-xl bg-caution/10 px-4 py-3 text-body-sm text-caution">
@@ -42,10 +42,10 @@ export function LoginForm() {
         />
       </div>
 
-      <Button type="submit" disabled={pending} className="mt-2 w-full">
+      <Button type="submit" disabled={pending} className="mt-2 w-full h-10 rounded-lg">
         {pending ? (
           <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <Loader2 className="mr-2 size-5 animate-spin" />
             Ingresando...
           </>
         ) : (
@@ -53,5 +53,6 @@ export function LoginForm() {
         )}
       </Button>
     </form>
+    </>
   );
 }

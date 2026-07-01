@@ -1,13 +1,13 @@
 "use client";
 
-import { useActionState, useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { Loader2, Banknote, CircleCheck } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { initMercadoPago, Wallet } from "@mercadopago/sdk-react";
 import { useCartStore } from "@/hooks/useCartStore";
-import { createOrderAction } from "@/actions/order.actions";
+import { createOrderAction, createMpPreferenceAction } from "@/actions/order.actions";
 import { ROUTES } from "@/constants/routes.constants";
 import EmptyCart from "@/components/features/cart/EmptyCart";
 import LinkShopButton from "@/components/features/cart/LinkShopButton";
@@ -28,33 +28,49 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<
     "mercadopago" | "whatsapp_efectivo" | null
   >(null);
-  const [state, formAction, pending] = useActionState(createOrderAction, null);
+  const [preferenceId, setPreferenceId] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
   const mpInitRef = useRef(false);
-  const toastShownRef = useRef(false);
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!paymentMethod) {
+      toast.error("Seleccioná un método de pago");
+      return;
+    }
+    setPending(true);
+
+    const formData = new FormData(e.currentTarget);
+    formData.set("paymentMethod", paymentMethod);
+
+    if (paymentMethod === "mercadopago") {
+      const result = await createMpPreferenceAction(null, formData);
+      if (result.preferenceId) {
+        setPreferenceId(result.preferenceId);
+      }
+      if (result.error) {
+        toast.error(result.error);
+      }
+    } else {
+      const result = await createOrderAction(null, formData);
+      if (result.redirectUrl) {
+        clearCart();
+        window.location.href = result.redirectUrl;
+      }
+      if (result.error) {
+        toast.error(result.error);
+      }
+    }
+
+    setPending(false);
+  }
 
   useEffect(() => {
-    if (state?.redirectUrl && state.paymentMethod === "whatsapp_efectivo") {
-      clearCart();
-      window.location.href = state.redirectUrl;
-    }
-  }, [state?.redirectUrl, state?.paymentMethod, clearCart]);
-
-  useEffect(() => {
-    if (state?.error && !toastShownRef.current) {
-      toast.error(state.error);
-      toastShownRef.current = true;
-    }
-    if (!state?.error) {
-      toastShownRef.current = false;
-    }
-  }, [state?.error]);
-
-  useEffect(() => {
-    if (state?.preferenceId && !mpInitRef.current) {
+    if (preferenceId && !mpInitRef.current) {
       initMercadoPago(PUBLIC_KEY);
       mpInitRef.current = true;
     }
-  }, [state?.preferenceId]);
+  }, [preferenceId]);
 
   if (items.length === 0 && !pending) {
     return <EmptyCart url={ROUTES.HOME} />;
@@ -63,11 +79,12 @@ export default function CheckoutPage() {
   const total = items.reduce((sum, item) => sum + item.cost, 0);
 
   return (
-    <div className="mx-auto w-full max-w-[1200px] px-5 py-10 relative">
+    <div className="mx-auto max-w-[1200px] px-5 py-10 relative">
       <motion.div
         variants={variantsNormalDownUp}
         initial="hidden"
         animate="visible"
+        className="w-fit"
       >
         <LinkShopButton url={ROUTES.CART} message="volver al carrito" />
       </motion.div>
@@ -86,25 +103,18 @@ export default function CheckoutPage() {
             </h1>
           </div>
 
-          {state?.preferenceId && paymentMethod === "mercadopago" ? (
+          {preferenceId && paymentMethod === "mercadopago" ? (
             <div className="max-w-sm">
               <p className="mb-4 text-body-sm text-graphite">
                 Hacé clic en el botón de Mercado Pago para ir al pago
               </p>
-              <Wallet initialization={{ preferenceId: state.preferenceId }} />
+              <Wallet initialization={{ preferenceId }} />
             </div>
           ) : (
             <form
-              action={formAction}
-              onSubmit={(e) => {
-                if (!paymentMethod) {
-                  e.preventDefault();
-                  toast.error("Seleccioná un método de pago");
-                }
-              }}
+              onSubmit={handleSubmit}
               className="md:sticky md:top-21"
             >
-              <input type="hidden" name="paymentMethod" value={paymentMethod ?? ""} />
               <input
                 type="hidden"
                 name="items"

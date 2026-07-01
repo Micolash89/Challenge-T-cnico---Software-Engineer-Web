@@ -8,7 +8,7 @@ interface LinkshopButtonProps {
 }
 export default function LinkShopButton({ url, message }: LinkshopButtonProps) {
   return (
-    <Link href={url}>
+    <Link href={url} className="w-fit">
       <Button
         variant="default"
         size="lg"
