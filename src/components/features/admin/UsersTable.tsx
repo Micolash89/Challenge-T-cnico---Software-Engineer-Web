@@ -30,12 +30,13 @@ interface User {
 interface UsersTableProps {
   users: User[];
   currentUserId: string;
+  currentUserRole: string;
 }
 
 const T = ADMIN_I18N.tables;
 const B = ADMIN_I18N.buttons;
 
-export function UsersTable({ users, currentUserId }: UsersTableProps) {
+export function UsersTable({ users, currentUserId, currentUserRole }: UsersTableProps) {
   const [editingUser, setEditingUser] = useState<User | null>(null);
 
   return (
@@ -111,6 +112,7 @@ export function UsersTable({ users, currentUserId }: UsersTableProps) {
         <UserEditModal
           user={editingUser}
           currentUserId={currentUserId}
+          currentUserRole={currentUserRole}
           open={!!editingUser}
           onClose={() => setEditingUser(null)}
         />

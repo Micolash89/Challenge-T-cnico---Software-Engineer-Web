@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { ADMIN_I18N } from '@/constants/admin-i18n.constants';
 
 export interface ActionResult {
   error?: string;
@@ -89,14 +90,46 @@ export async function updateUserAction(
   _prev: ActionResult | null | undefined,
   formData: FormData,
 ): Promise<ActionResult> {
-  const authError = await checkAdminAuth();
-  if (authError) return authError;
+  const supabase = await createClient();
+  const { data: { user: currentUser } } = await supabase.auth.getUser();
+
+  if (!currentUser || !['admin', 'super_admin'].includes(currentUser.user_metadata?.role as string)) {
+    return { error: 'No autorizado' };
+  }
 
   const name = formData.get('name') as string;
+  const role = formData.get('role') as string;
 
   const adminClient = createAdminClient();
+  const metadata: Record<string, unknown> = { full_name: name };
+
+  if (role) {
+    const currentUserRole = currentUser.user_metadata?.role as string;
+
+    if (currentUser.id === id) {
+      return { error: ADMIN_I18N.users.cannotChangeOwnRole };
+    }
+
+    if (!['user', 'admin', 'super_admin'].includes(role)) {
+      return { error: 'Rol inválido' };
+    }
+
+    if (currentUserRole !== 'super_admin') {
+      if (role === 'super_admin') {
+        return { error: ADMIN_I18N.users.promoteForbidden };
+      }
+      const { data: targetUser } = await adminClient.auth.admin.getUserById(id);
+      const targetRole = targetUser?.user?.user_metadata?.role as string;
+      if (targetRole === 'super_admin') {
+        return { error: ADMIN_I18N.users.promoteForbidden };
+      }
+    }
+
+    metadata.role = role;
+  }
+
   const { error } = await adminClient.auth.admin.updateUserById(id, {
-    user_metadata: { full_name: name },
+    user_metadata: metadata,
   });
 
   if (error) return { error: error.message };
@@ -135,13 +168,17 @@ export async function getDashboardMetricsAction(): Promise<{
   totalRevenue: number;
 }> {
   const supabase = await createClient();
+  const adminClient = createAdminClient();
 
-  const [{ count: totalProducts }, { count: totalOrders }, { data: revenueData }] =
-    await Promise.all([
-      supabase.from('products').select('*', { count: 'exact', head: true }),
-      supabase.from('orders').select('*', { count: 'exact', head: true }),
-      supabase.from('orders').select('total_ars').eq('status', 'pagado'),
-    ]);
+  const [
+    { count: totalProducts },
+    { count: totalOrders },
+    { data: revenueData },
+  ] = await Promise.all([
+    supabase.from('products').select('*', { count: 'exact', head: true }),
+    adminClient.from('orders').select('*', { count: 'exact', head: true }),
+    adminClient.from('orders').select('total_ars').eq('status', 'pagado'),
+  ]);
 
   const totalRevenue =
     revenueData?.reduce((sum, o) => sum + (Number(o.total_ars) || 0), 0) ?? 0;

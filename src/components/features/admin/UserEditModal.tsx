@@ -15,13 +15,35 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { ConfirmationModal } from '@/components/ui/confirmation-modal';
 import { UserRoleBadge } from './UserRoleBadge';
 import { ADMIN_I18N } from '@/constants/admin-i18n.constants';
-import { updateUserAction, deleteUserAction } from '@/actions/admin.actions';
+import {
+  updateUserAction,
+  deleteUserAction,
+} from '@/actions/admin.actions';
 
 const U = ADMIN_I18N.users;
 const B = ADMIN_I18N.buttons;
+
+const ROLE_OPTIONS: Record<string, { value: string; label: string }[]> = {
+  super_admin: [
+    { value: 'user', label: 'Usuario' },
+    { value: 'admin', label: 'Administrador' },
+    { value: 'super_admin', label: 'Super Administrador' },
+  ],
+  admin: [
+    { value: 'user', label: 'Usuario' },
+    { value: 'admin', label: 'Administrador' },
+  ],
+};
 
 interface UserEditModalProps {
   user: {
@@ -31,23 +53,28 @@ interface UserEditModalProps {
     role: string;
   };
   currentUserId: string;
+  currentUserRole: string;
   open: boolean;
   onClose: () => void;
 }
 
-export function UserEditModal({ user, currentUserId, open, onClose }: UserEditModalProps) {
+export function UserEditModal({ user, currentUserId, currentUserRole, open, onClose }: UserEditModalProps) {
   const router = useRouter();
   const [name, setName] = useState(user.name ?? '');
+  const [role, setRole] = useState(user.role);
   const [saving, setSaving] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   const isSelf = user.id === currentUserId;
+  const canChangeRole = !isSelf && ['admin', 'super_admin'].includes(currentUserRole);
+  const roleOptions = ROLE_OPTIONS[currentUserRole] ?? ROLE_OPTIONS.admin;
 
   const handleSave = async () => {
     setSaving(true);
     const formData = new FormData();
     formData.set('name', name);
+    formData.set('role', role);
 
     const result = await updateUserAction(user.id, null, formData);
 
@@ -101,7 +128,7 @@ export function UserEditModal({ user, currentUserId, open, onClose }: UserEditMo
                 <p className="truncate text-sm font-medium">{user.name ?? '—'}</p>
                 <p className="truncate text-xs text-muted-foreground">{user.email ?? '—'}</p>
               </div>
-              <UserRoleBadge role={user.role} />
+              <UserRoleBadge role={role} />
             </div>
 
             {/* Edit name */}
@@ -113,6 +140,28 @@ export function UserEditModal({ user, currentUserId, open, onClose }: UserEditMo
                 onChange={(e) => setName(e.target.value)}
               />
             </div>
+
+            {/* Edit role */}
+            {canChangeRole && (
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="edit-role">{U.role}</Label>
+                <Select
+                  value={role}
+                  onValueChange={setRole}
+                >
+                  <SelectTrigger id="edit-role" className="cursor-pointer">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {roleOptions.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value} className="cursor-pointer">
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
 
           <DialogFooter className="flex flex-row items-center justify-between gap-3 sm:gap-0 mt-1">

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 export interface DashboardChartData {
   timeline: Array<{ date: string; orders: number }>;
@@ -13,7 +13,6 @@ export interface DashboardChartData {
  * - Status distribution: order counts grouped by status
  */
 export async function getDashboardChartData(): Promise<DashboardChartData> {
-  const supabase = await createClient();
 
   // Calculate date 7 days ago
   const sevenDaysAgo = new Date();
@@ -22,7 +21,8 @@ export async function getDashboardChartData(): Promise<DashboardChartData> {
 
   // Fetch all orders from last 7 days (the grouping happens in JS since we
   // need to handle both Supabase response format and potential missing dates)
-  const { data: orders } = await supabase
+  const adminClient = createAdminClient();
+  const { data: orders } = await adminClient
     .from('orders')
     .select('created_at, status, total_ars')
     .gte('created_at', since);
