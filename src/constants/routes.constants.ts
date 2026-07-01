@@ -4,7 +4,7 @@ export const ROUTES = {
   LOGIN: '/login',
   REGISTER: '/register',
   YUGIOH: '/yugioh',
-  
+  PROFILE:'/perfil',
   ADMIN: {
     ROOT: '/admin',
     DASHBOARD: '/admin/dashboard',

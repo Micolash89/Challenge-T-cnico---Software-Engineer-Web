@@ -90,12 +90,15 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
             </div>
             <p className="text-body text-graphite">Tu carrito está vacío</p>
             <Link
-              href={ROUTES.HOME}
+              href={ROUTES.YUGIOH}
               onClick={onClose}
-              className="text-body-sm font-medium text-cobalt-link underline-offset-2 hover:underline"
+              className="text-body-sm font-medium text-cobalt-link underline-offset-2 hover:cursor-pointer rounded-lg bg-primary px-6 py-3 text-snow transition-opacity hover:bg-primary/80"
             >
               Ver productos
             </Link>
+
+
+
           </div>
         )}
 

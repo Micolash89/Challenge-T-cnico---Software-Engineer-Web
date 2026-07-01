@@ -75,7 +75,8 @@ function SheetContent({
               className="absolute top-3 right-3"
               size="icon-sm"
             >
-              <XIcon
+              <XIcon 
+                className="size-5"
               />
               <span className="sr-only">Close</span>
             </Button>

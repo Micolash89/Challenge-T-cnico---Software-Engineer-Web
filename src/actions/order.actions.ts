@@ -221,14 +221,6 @@ export async function createOrderAction(
   }
 }
 
-export async function verifyPaymentAction(
-  orderId: string,
-): Promise<{ verified: boolean; error?: string }> {
-  const order = await getOrder(orderId);
-  if (!order) return { verified: false, error: 'Pedido no encontrado' };
-  return { verified: order.status === 'pagado' };
-}
-
 export async function getOrderForReservationAction(
   orderId: string,
 ): Promise<ReservationData> {

@@ -10,6 +10,7 @@ import {
   LogOut,
   LayoutDashboard,
   Menu,
+  User,
 } from "lucide-react";
 import { useCartStore } from "@/hooks/useCartStore";
 import { CartDrawer } from "@/components/features/cart/CartDrawer";
@@ -25,9 +26,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { variantsNormalUpDown } from "@/lib/animation-variants";
 
-const NAV_LINKS = [
-  { label: "Yu-Gi-Oh!", href: "/yugioh" },
-] as const;
+const NAV_LINKS = [{ label: "Yu-Gi-Oh!", href: "/yugioh" }] as const;
 
 interface NavbarProps {
   isAuthenticated: boolean;
@@ -64,26 +63,26 @@ export function Navbar({ isAuthenticated, isAdmin }: NavbarProps) {
                 className="flex w-[280px] flex-col sm:w-[320px]"
               >
                 <SheetHeader>
-                  <SheetTitle className="text-left font-heading text-base">
-                    Navegación
+                  <SheetTitle className="text-left font-heading text-lg border-b px-1 py-2">
+                    <span>Navegación</span>
                   </SheetTitle>
                 </SheetHeader>
 
-                <div className="mt-2 flex flex-col gap-1 px-4">
+                <div className="mt-2 flex flex-col gap-1 ">
                   {NAV_LINKS.map((link) => (
                     <Link
                       key={link.href}
                       href={link.href}
                       onClick={() => setMenuOpen(false)}
-                      className="flex items-center gap-3 rounded-lg p-3 transition-colors hover:bg-accent"
+                      className="flex items-center gap-3 rounded-lg transition-colors hover:bg-accent"
                     >
-                      <div className="flex size-10 items-center justify-center rounded-lg border border-silver-mist bg-snow">
+                      <div className="flex size-11 items-center justify-center rounded-lg ml-1 bg-snow">
                         <Image
                           src="/images/yugioh-back.jpg"
                           alt={link.label}
-                          width={36}
-                          height={36}
-                          className="rounded-sm object-contain"
+                          width={15}
+                          height={15}
+                          className="rounded-sm object-contain w-full h-full"
                         />
                       </div>
                       <span className="text-sm font-medium text-ink">
@@ -98,15 +97,39 @@ export function Navbar({ isAuthenticated, isAdmin }: NavbarProps) {
                     <Link
                       href={ROUTES.ADMIN.DASHBOARD}
                       onClick={() => setMenuOpen(false)}
-                      className="flex items-center gap-3 rounded-lg p-3 transition-colors hover:bg-accent"
+                      className="flex items-center gap-5 rounded-lg p-3 pl-0 transition-colors hover:bg-accent"
                     >
-                      <LayoutDashboard className="size-5 text-ink/80" />
+                      <LayoutDashboard className="size-5 text-black" />
                       <span className="text-sm font-medium text-ink">
                         Dashboard
                       </span>
                     </Link>
                   </div>
                 )}
+                {!isAdmin && isAuthenticated && (
+                  <div className="mt-1 px-4">
+                    <Link
+                      href={ROUTES.PROFILE}
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-5 rounded-lg p-3 transition-colors hover:bg-accent"
+                    >
+                      <User className="size-5 text-ink/80" />
+                      <span className="text-sm font-medium text-ink">
+                        Perfil
+                      </span>
+                    </Link>
+                  </div>
+                )}
+                <Link
+                  href={ROUTES.CART}
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-5 rounded-lg p-3 transition-colors hover:bg-accent"
+                >
+                  <ShoppingBag className="size-5 text-ink/80" />
+                  <span className="text-sm font-medium text-ink">
+                    Carrito ({itemCount})
+                  </span>
+                </Link>
 
                 <div className="mt-auto border-t border-silver-mist px-4 pb-4 pt-3">
                   {isAuthenticated ? (
@@ -178,6 +201,17 @@ export function Navbar({ isAuthenticated, isAdmin }: NavbarProps) {
               >
                 <LayoutDashboard className="size-[18px]" />
                 <span className="hidden sm:inline">Dashboard</span>
+              </Link>
+            )}
+
+            {!isAdmin && isAuthenticated && (
+              <Link
+                href={ROUTES.PROFILE}
+                title="Ir al perfil"
+                className="hidden md:flex items-center gap-1.5 text-[13px] font-medium text-ink/80 transition-colors hover:text-ink"
+              >
+                <User className="size-[18px]" />
+                <span className="hidden sm:inline">Perfil</span>
               </Link>
             )}
 

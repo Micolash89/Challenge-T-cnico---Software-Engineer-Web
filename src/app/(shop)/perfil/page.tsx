@@ -9,22 +9,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { STATUS_COLORS, STATUS_LABELS } from '@/constants/perfil.constants';
+import { User } from 'lucide-react';
 
 export const metadata = {
   title: 'Mi Perfil',
 };
 
-const STATUS_LABELS: Record<string, string> = {
-  reservado: 'Reservado',
-  pagado: 'Pagado',
-  cancelado: 'Cancelado',
-};
 
-const STATUS_COLORS: Record<string, string> = {
-  pagado: 'bg-[hsl(142,76%,36%)]',
-  cancelado: 'bg-[hsl(0,84%,60%)]',
-  reservado: 'bg-[hsl(38,92%,50%)]',
-};
 
 interface OrderRow {
   id: string;
@@ -68,8 +60,11 @@ export default async function PerfilPage() {
     <div className="mx-auto max-w-4xl px-4 py-10">
       {/* User info */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold">Mi Perfil</h1>
-        <div className="mt-4 rounded-xl border bg-card p-6">
+        <div className='flex items-center gap-3 mb-3'>
+          <User className="text-black " />
+        <h1 className="text-3xl font-bold">Mi Perfil</h1>
+        </div>
+        <div className="mt-4 rounded-lg border bg-card p-6">
           <dl className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-3">
             <div>
               <dt className="text-muted-foreground">Nombre</dt>
@@ -94,7 +89,7 @@ export default async function PerfilPage() {
         {userOrders.length === 0 ? (
           <p className="text-muted-foreground">No tenés compras aún.</p>
         ) : (
-          <div className="rounded-xl border bg-card">
+          <div className="rounded-lg border bg-card">
             <Table>
               <TableHeader>
                 <TableRow>
