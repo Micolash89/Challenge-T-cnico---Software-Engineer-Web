@@ -8,6 +8,23 @@ import { ROUTES } from '@/constants/routes.constants';
 
 export interface AuthActionResult {
   error?: string;
+  success?: boolean;
+}
+
+const SUPABASE_ERROR_MAP: Record<string, string> = {
+  'Invalid login credentials': 'Email o contraseña incorrectos',
+  'Email not confirmed': 'Email no confirmado',
+  'Email rate limit exceeded': 'Demasiados intentos. Esperá unos minutos e intentá de nuevo.',
+  'User already registered': 'Ya existe una cuenta con ese email.',
+  'For security purposes, you can only request this after':
+    'Esperá unos segundos antes de intentar de nuevo.',
+};
+
+function mapError(message: string): string {
+  for (const [key, value] of Object.entries(SUPABASE_ERROR_MAP)) {
+    if (message.startsWith(key)) return value;
+  }
+  return message;
 }
 
 export async function signInAction(
@@ -30,10 +47,7 @@ export async function signInAction(
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
 
   if (error) {
-    if (error.message === 'Invalid login credentials') {
-      return { error: 'Email o contraseña incorrectos' };
-    }
-    return { error: error.message };
+    return { error: mapError(error.message) };
   }
 
   const redirectTo = (formData.get('redirect') as string) || ROUTES.HOME;
@@ -48,6 +62,7 @@ export async function signUpAction(
     name: formData.get('name') as string,
     email: formData.get('email') as string,
     password: formData.get('password') as string,
+    confirmPassword: formData.get('confirmPassword') as string,
   };
 
   const parsed = signUpSchema.safeParse(raw);
@@ -69,10 +84,10 @@ export async function signUpAction(
   });
 
   if (error) {
-    return { error: error.message };
+    return { error: mapError(error.message) };
   }
 
-  redirect(`${ROUTES.LOGIN}?verified=false`);
+  return { success: true };
 }
 
 export async function signOutAction(): Promise<void> {
