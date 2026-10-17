@@ -1,6 +1,6 @@
-import { eq, and, sql } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { db as getDb } from '@/db';
-import { orders, orderItems, products } from '@/db/schema';
+import { orders, orderItems } from '@/db/schema';
 
 export async function getCart(userId: string) {
     const db = getDb();

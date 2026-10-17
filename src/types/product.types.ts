@@ -5,17 +5,17 @@ export interface Product {
   type: 'card' | 'box';
   img: string;
   price: string;
-  price_ars: number;
+  priceArs: string; // Coincide con schema.ts (decimal)
   rarity: string;
-  rarity_code: string;
+  rarityCode: string;
   category: string;
   product_line_name: string;
   productId: number;
   stock: number;
   active: boolean;
   featured: boolean;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date; // Drizzle usa Date para timestamps
+  updatedAt: Date;
 }
 
 export interface CartItem extends Product {

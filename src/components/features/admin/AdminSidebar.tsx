@@ -10,7 +10,6 @@ import {
   ShoppingCart,
   LogOut,
   Store,
-  Plus,
   Users,
   Menu,
   X,

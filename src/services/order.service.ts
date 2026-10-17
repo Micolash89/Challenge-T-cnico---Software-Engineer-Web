@@ -68,49 +68,64 @@ export async function getOrder(orderId: string) {
   return { ...order, items };
 }
 
-export async function adminMarkAsPaid(orderId: string) {
-  const db = getDb();
+export type OrderDbClient = ReturnType<typeof getDb>;
+type OrderDbTx = Parameters<Parameters<OrderDbClient['transaction']>[0]>[0];
 
-  await db.transaction(async (tx) => {
-    const [order] = await tx
-      .select()
-      .from(orders)
-      .where(eq(orders.id, orderId))
-      .limit(1);
+async function executeMarkAsPaid(tx: OrderDbTx, orderId: string) {
+  const [order] = await tx
+    .select()
+    .from(orders)
+    .where(eq(orders.id, orderId))
+    .limit(1);
 
-    if (!order) throw new Error('Pedido no encontrado');
-    if (order.status !== 'reservado') {
-      throw new Error('Solo pedidos reservados pueden marcarse como pagados');
+  if (!order) throw new Error('Pedido no encontrado');
+  if (order.status !== 'reservado') {
+    throw new Error('Solo pedidos reservados pueden marcarse como pagados');
+  }
+
+  const items = await tx
+    .select()
+    .from(orderItems)
+    .where(eq(orderItems.orderId, orderId));
+
+  for (const item of items) {
+    const result = await tx
+      .update(products)
+      .set({ stock: sql`${products.stock} - ${item.quantity}` })
+      .where(
+        and(
+          eq(products.id, item.productId),
+          sql`${products.stock} >= ${item.quantity}`,
+        ),
+      );
+
+    if (result.count === 0) {
+      throw new Error(`Stock insuficiente para ${item.productName}`);
     }
+  }
 
-    const items = await tx
-      .select()
-      .from(orderItems)
-      .where(eq(orderItems.orderId, orderId));
+  await tx
+    .update(orders)
+    .set({ status: 'pagado' })
+    .where(eq(orders.id, orderId));
+}
 
-    for (const item of items) {
-      const result = await tx
-        .update(products)
-        .set({ stock: sql`${products.stock} - ${item.quantity}` })
-        .where(
-          and(
-            eq(products.id, item.productId),
-            sql`${products.stock} >= ${item.quantity}`,
-          ),
-        );
-
-      if (result.count === 0) {
-        throw new Error(
-          `Stock insuficiente para ${item.productName}`,
-        );
-      }
-    }
-
-    await tx
-      .update(orders)
-      .set({ status: 'pagado' })
-      .where(eq(orders.id, orderId));
+async function markAsPaidTransaction(orderId: string, customDb?: OrderDbClient) {
+  const database = customDb ?? getDb();
+  await database.transaction(async (tx) => {
+    await executeMarkAsPaid(tx, orderId);
   });
+}
+
+export async function adminMarkAsPaid(orderId: string) {
+  await markAsPaidTransaction(orderId);
+}
+
+export async function markAsPaidFromWebhook(
+  orderId: string,
+  customDb?: OrderDbClient,
+) {
+  await markAsPaidTransaction(orderId, customDb);
 }
 
 
