@@ -103,7 +103,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                   {product.category}
                 </Badge>
                 <Badge variant="outline" className="text-caption font-medium uppercase">
-                  {product.rarity_code}
+                  {product.rarityCode}
                 </Badge>
               </div>
 
